@@ -1,0 +1,290 @@
+*vim-which-key.txt*
+                                                               *vim-which-key*
+
+==============================================================================
+CONTENTS                                              *vim-which-key-contents*
+  1. Introduction........................................|vim-which-key-intro|
+  2. Usage...............................................|vim-which-key-usage|
+  3. Configuration......................................|vim-which-key-config|
+  4. Commands.........................................|vim-which-key-commands|
+  5. Functions.......................................|vim-which-key-functions|
+
+==============================================================================
+INTRODUCTION                                             *vim-which-key-intro*
+
+vim-which-key is vim port of {emacs-which-key}{1} that displays available
+keybindings in popup.
+
+{emacs-which-key}{1} started as a rewrite of {guide-key}{2}, very likely,
+{vim-which-key}{3} heavily rewrote {vim-leader-guide}{4} with a goal of going
+further in vim world. The features of vim-which-key has evolved a lot since
+then.
+
+{1} https://github.com/justbur/emacs-which-key
+
+{2} https://github.com/kai2nenobu/guide-key
+
+{3} https://github.com/liuchengxu/vim-which-key
+
+{4} https://github.com/hecal3/vim-leader-guide
+
+==============================================================================
+USAGE                                                    *vim-which-key-usage*
+
+Usage Let's say `SPC` is your leader key and you use it to trigger
+vim-which-key:
+>
+  nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+<
+After pressing leader the guide buffer will pop up when there are no further
+keystrokes within `timeoutlen`.
+>
+  " By default timeoutlen is 1000 ms
+  set timeoutlen=500
+<
+Pressing other keys within `timeoutlen` will either complete the mapping or
+open a subgroup.
+
+Please note that no matter which mappings and menus you configure, your
+original leader mappings will remain unaffected. The key guide is an
+additional layer. It will only activate, when you do not complete your input
+during the timeoutlen duration.
+
+Note that, a description dictionary is not necessary, all mappings will be
+displayed regardless.
+>
+  nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
+<
+
+However, the dictionary configuration is necessary to provide group names or a
+description text.
+
+Example:
+>
+  Define prefix dictionary
+  let g:which_key_map =  {}
+
+  Second level dictionaries:
+  'name' is a special field. It will define the name of the group.
+  leader-f is the "+file" group.
+  Unnamed groups will show a default string
+  let g:which_key_map.f = { 'name' : '+file' }
+
+  nnoremap <silent> <leader>fs :update<CR>
+  let g:which_key_map.f.s = ['update', 'save-file']
+
+  Provide commands and descriptions for existing mappings
+  command, <Plug>/<C-W>/<C-d> mapping are supported
+  nnoremap <silent> <leader>fd :e $MYVIMRC<CR>
+  let g:which_key_map.f.d = ['e $MYVIMRC', 'open-vimrc']
+
+  let g:which_key_map.o = { 'name' : '+open' }
+
+  nnoremap <silent> <leader>oq  :copen<CR>
+  let g:which_key_map.o.q = ['copen', 'open-quickfix']
+
+  nnoremap <silent> <leader>ol  :lopen<CR>
+  let g:which_key_map.o.l = ['lopen', 'open-locationlist']
+
+  Create new menus not based on existing mappings:
+  let g:which_key_map.b = {
+       \ 'name' : '+buffer' ,
+       \ '1' : ['b1'        , 'buffer 1']        ,
+       \ '2' : ['b2'        , 'buffer 2']        ,
+       \ 'd' : ['bd'        , 'delete-buffer']   ,
+       \ 'f' : ['bfirst'    , 'first-buffer']    ,
+       \ 'h' : ['Startify'  , 'home-buffer']     ,
+       \ 'l' : ['blast'     , 'last-buffer']     ,
+       \ 'n' : ['bnext'     , 'next-buffer']     ,
+       \ 'p' : ['bprevious' , 'previous-buffer'] ,
+       \ '?' : ['Buffers'   , 'fzf-buffer']      ,
+       \ }
+
+  let g:which_key_map.l = {
+       \ 'name' : '+lsp'                                            ,
+       \ 'f' : ['LanguageClient#textDocument_formatting()'     , 'formatting']
+    ,
+       \ 'h' : ['LanguageClient#textDocument_hover()'          , 'hover']
+    ,
+       \ 'r' : ['LanguageClient#textDocument_references()'     , 'references']
+    ,
+       \ 'R' : ['LanguageClient#textDocument_rename()'         , 'rename']
+    ,
+       \ 's' : ['LanguageClient#textDocument_documentSymbol()' , 'document-
+    symbol']  ,
+       \ 'S' : ['LanguageClient#workspace_symbol()'            , 'workspace-
+    symbol'] ,
+       \ 'g' : {
+         \ 'name': '+goto',
+         \ 'd' : ['LanguageClient#textDocument_definition()'     ,
+    'definition']       ,
+         \ 't' : ['LanguageClient#textDocument_typeDefinition()' , 'type-
+    definition']  ,
+         \ 'i' : ['LanguageClient#textDocument_implementation()'  ,
+    'implementation']   ,
+         \ },
+       \ }
+<
+To make the guide pop up **Register the description dictionary for the prefix
+first** (assuming `Space` is your leader key):
+>
+  call which_key#register('<Space>', "g:which_key_map")
+  nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
+  vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
+<
+It is possible to call the guide for keys other than `leader`:
+>
+  nnoremap <localleader> :<c-u>WhichKey  ','<CR>
+  vnoremap <localleader> :<c-u>WhichKeyVisual  ','<CR>
+<
+
+==============================================================================
+CONFIGURATION                                           *vim-which-key-config*
+
+                                                             *g:which_key_sep*
+Set the separator used between keys and descriptions. Change this setting to
+an ASCII character if your font does not show the default arrow.
+>
+  let g:which_key_sep = '→'
+<
+
+                                                          *g:which_key_hspace*
+Set the minimum horizontal space between the displayed colomns.
+
+Possible value: {Number}. By default it's 5.
+>
+  let g:which_key_hspace = 5
+<
+
+                                                         *g:which_key_flatten*
+Try to flatten out the keymappings if necessary.
+
+Possible value: {0, 1}. By default it's 1.
+>
+  let g:which_key_flatten = 1
+<
+
+                                                        *g:which_key_max_size*
+Set the maximum height/width of the guide window. Set to 0 for unlimited size.
+
+Possible value: {Number}. By default it's 0.
+>
+  let g:which_key_max_size = 0
+<
+
+                                                        *g:which_key_vertical*
+If set to a value other than 0, the guide buffer will pop up in vertical split
+window.
+
+Possible value: {0, 1}. By default it's 0.
+>
+  let g:which_key_vertical = 0
+<
+
+                                                        *g:which_key_position*
+Set the direction from witch the guide-buffer should pop up.
+
+Possible value: 'botright', 'topleft'. By default it's 'botright'.
+>
+  let g:which_key_position = 'botright'
+<
+
+                                                 *g:which_key_sort_horizontal*
+If set to a value other than 0, the entries will be sorted horizontal.
+
+Possible value: {0, 1}. By default it's 0.
+>
+  let g:which_key_sort_horizontal = 0
+<
+
+                                                *g:which_key_run_map_on_popup*
+Mappings change during a vim-session, e.g., changing the filetype or buffer.
+Thus, when disabling this option the displayed mappings might get outdated.
+The delay when opening the guide is negligible.
+
+The update is almost instantaneous and will only run when the guide actually
+pops up. Apart from that the automatic update has no performance impact.
+
+Note: It is not recommended to disable this option. If set to 0,
+|vim-leader-guide| will not parse mappings when opening a guide buffer. Cached
+values will be used instead.
+
+Possible value: {0, 1}. By default it's 1.
+>
+  let g:which_key_run_map_on_popup = 1
+<
+
+                                              *g:which_key_default_group_name*
+Allows to set a default group name. This name is shown as group description
+when the configuration dictionary has no corrosponding entry.
+
+Possible value: {String}. By default it's emprty.
+>
+  let g:which_key_default_group_name = ''
+<
+
+                                                        *g:WhichKeyFormatFunc*
+WhichKeyFormatFunc is a Funcref called on every display item, which could be
+used to hide all trailing <CR> as well as all leading <Plug> substring in the
+guide buffer.
+
+Possible value: Funcref. By default it's function('which_key#util#format').
+>
+  let g:WhichKeyFormatFunc = function('which_key#util#format')
+<
+
+==============================================================================
+COMMANDS                                              *vim-which-key-commands*
+
+:WhichKey[!]                                                       *:WhichKey*
+  Open the guide window for the given prefix. This command, together with
+  |:WhichKeyVisual| is the primary way of interacting with the plugin.
+
+  Example:
+>
+    nnoremap <leader> :<C-U>WhichKey '<Space>'<CR>
+<
+
+  Use |:WhichKey!| open the guide window for a given dictionary directly.
+
+  Example:
+>
+    :WhichKey! g:which_key_dict
+<
+
+:[range]WhichKeyVisual[!]                                    *:WhichKeyVisual*
+  Same as |:WhichKey|, but opening the menu in visual mode.
+
+==============================================================================
+FUNCTIONS                                            *vim-which-key-functions*
+
+which_key#register({prefix}, {dict})                    *which_key#register()*
+  Provide the guide with a {prefix} and its description dictionary. This
+  dictionary {dict} is used to provide convenient names for mappings to
+  display in the guide popup. Additionally it is used to provide group names.
+
+  Possible value: {prefix}: String, {dict}: String
+
+  Example:
+>
+    " register dictionary for the <Space>-prefix
+    call leaderGuide#register_prefix_descriptions(' ', "g:space_prefix_dict")
+
+    " register dictionary for the ,-prefix
+    call leaderGuide#register_prefix_descriptions(',', "g:comma_prefix_dict")
+<
+
+which_key#start({vis}, {bang}, {prefix})                   *which_key#start()*
+  This is the implementation for |:WhichKey| and |:WhichKey!|.
+
+which_key#parse_mappings()                        *which_key#parse_mappings()*
+
+  Update the cache manually by calling this function.
+
+which_key#util#format({mapping})                     *which_key#util#format()*
+  This function is called on all for every display string in the guide buffer.
+  By default |vim-which-key| will hide all trailing <CR> as well as all
+  leading <C-U> and `:`.
+
+
+vim:tw=78:ts=8:ft=help:norl:
