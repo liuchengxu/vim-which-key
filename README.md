@@ -99,11 +99,18 @@ Please note that no matter which mappings and menus you configure, your original
 
 #### Miminal Configuration
 
-If no description dictionary is available, the right-handle-side of all mappings will be displayed:
+`:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
 
 ```vim
-nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
+" Assume your leader and localleader key are `<Space>` and `,`, respectively
+" Even no description dictionary is registered, all `<Space>` and `,` related mappins will be displayed regardless.
+" However, these displayed content is normally not adequate to serve as a cheatsheet.
+" See the following section for configuring it properly.
+nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
 ```
+
+If no description dictionary is available, the right-hand-side of all mappings will be displayed:
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/raw-spc-w.png"></p>
 
