@@ -1,5 +1,12 @@
 scriptencoding utf-8
 
+let g:which_key#util#TYPE = {
+      \ 'string':  type(''),
+      \ 'list':    type([]),
+      \ 'dict':    type({}),
+      \ 'funcref': type(function('call'))
+      \ }
+
 let s:displaynames = {
       \ ' ': 'SPC',
       \ '<C-H>': '<BS>',
