@@ -71,6 +71,16 @@ function! s:merge(dict_t, dict_o) " {{{
       endif
     endif
   endfor
+  for [key, value] in items(target)
+    if key == 'name'
+      continue
+    endif
+    if type(value) == s:TYPE.string
+      let target[key] = [
+            \ has_key(other, key) ? other[key][0] : 'which_key#util#mismatch()',
+            \ value ]
+    endif
+  endfor
   call extend(target, other, 'keep')
 endfunction
 
