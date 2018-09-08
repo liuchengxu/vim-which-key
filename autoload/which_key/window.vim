@@ -54,8 +54,8 @@ function! s:open() abort
   " Snippets from vim-game-code-break
   augroup which_key_cursor
     autocmd!
-    execute 'autocmd BufLeave <buffer> set t_ve=' . &t_ve
-    execute 'autocmd VimLeave <buffer> set t_ve=' . &t_ve
+    execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+    execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
   augroup END
   setlocal t_ve=
 endfunction
