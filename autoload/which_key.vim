@@ -71,6 +71,11 @@ function! s:merge(dict_t, dict_o) " {{{
       endif
     endif
   endfor
+
+  if has_key(target, '<Tab>') && has_key(other, '<C-I>')
+    call remove(other, '<C-I>')
+  endif
+
   call extend(target, other, 'keep')
 endfunction
 
@@ -98,6 +103,11 @@ function! s:getchar() abort
     call which_key#window#close()
     redraw!
     return ''
+  endif
+
+  " <Tab>, <C-I>
+  if c == 9
+    return '<Tab>'
   endif
 
   if c =~? '^\d\+$' || type(c) == type(0)
