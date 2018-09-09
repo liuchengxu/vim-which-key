@@ -72,7 +72,10 @@ function! s:merge(dict_t, dict_o) " {{{
     endif
   endfor
 
-  if has_key(target, '<Tab>') && has_key(other, '<C-I>')
+  if has_key(other, '<C-I>')
+    if !has_key(target, '<Tab>')
+      let target['<Tab>'] = other['<C-I>']
+    endif
     call remove(other, '<C-I>')
   endif
 
