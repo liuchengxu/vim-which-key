@@ -71,16 +71,26 @@ function! s:merge(dict_t, dict_o) " {{{
       endif
     endif
   endfor
+
   for [key, value] in items(target)
     if key == 'name'
       continue
     endif
     if type(value) == s:TYPE.string
-      let target[key] = [
-            \ has_key(other, key) ? other[key][0] : 'which_key#util#mismatch()',
+      if key == '<Tab>' && has_key(other, '<C-I>')
+        let target[key] = [other['<C-I>'][0], value]
+      else
+        let target[key] = [
+              \ has_key(other, key) ? other[key][0] : 'which_key#util#mismatch()',
             \ value ]
+      endif
     endif
   endfor
+
+  if has_key(target, '<Tab>') && has_key(other, '<C-I>')
+    call remove(other, '<C-I>')
+  endif
+
   call extend(target, other, 'keep')
 endfunction
 
@@ -108,6 +118,11 @@ function! s:getchar() abort
     call which_key#window#close()
     redraw!
     return ''
+  endif
+
+  " <Tab>, <C-I>
+  if c == 9
+    return '<Tab>'
   endif
 
   if c =~? '^\d\+$' || type(c) == type(0)
