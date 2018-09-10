@@ -15,7 +15,7 @@ let s:displaynames = {
 
 function! which_key#util#calc_layout(mappings) abort
   let layout = {}
-  let smap = filter(copy(a:mappings), 'v:key !=# "name"')
+  let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == type([]) && v:val[1] == "which_key_ignore")')
   let layout.n_items = len(smap)
   let length = values(map(smap,
         \ 'strdisplaywidth(get(s:displaynames, toupper(v:key), v:key).'.
@@ -56,6 +56,9 @@ function! which_key#util#create_string(layout, mappings) abort
   for k in smap
     let key = get(s:displaynames, toupper(k), k)
     let desc = type(mappings[k]) == type({}) ? mappings[k].name : mappings[k][1]
+    if desc == 'which_key_ignore'
+      continue
+    endif
     let item = s:combine(key, desc)
 
     let crow = get(rows, row, [])

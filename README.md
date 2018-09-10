@@ -141,6 +141,12 @@ let g:which_key_map['w'] = {
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/spc-w.png"></p>
 
+If you wish to hide a mapping from the menu set it's description to `'which_key_ignore'`. Useful for instance, to hide a list of <leader>[1-9] window swapping mappings. For example the below mapping will not be shown in the menu.
+```vim
+nnoremap <leader>1 :1wincmd w<CR>
+let g:which_key_map.1 = 'which_key_ignore'
+```
+
 #### Example
 
 Refer to [space-vim](https://github.com/liuchengxu/space-vim/blob/master/core/autoload/spacevim/map/leader.vim) for more detailed example.
