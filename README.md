@@ -101,12 +101,14 @@ Please note that no matter which mappings and menus you configure, your original
 
 `:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
 
-Assume your `leader` and `localleader` key are `<Space>` and `,`, respectively. Even no description dictionary is registered, all `<Space>` and `,` related mappings will be displayed regardless. However, these displayed content is normally not adequate to serve as a cheatsheet. See the following section for configuring it properly.
+Assuming your `leader` and `localleader` key are `<Space>` and `,`, respectively, even no description dictionary has registered, all `<Space>` and `,` related mappings will be displayed regardless.
 
 ```vim
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
 ```
+
+The raw content displayed is normally not adequate to serve as a cheatsheet. See the following section for configuring it properly.
 
 If no description dictionary is available, the right-hand-side of all mappings will be displayed:
 
@@ -168,15 +170,14 @@ nnoremap <silent> <leader>oq  :copen<CR>
 nnoremap <silent> <leader>ol  :lopen<CR>
 let g:which_key_map.o = {
       \ 'name' : '+open',
-      \ 'q' : 'open-quickfix',
+      \ 'q' : 'open-quickfix'    ,
       \ 'l' : 'open-locationlist',
       \ }
 
 " =======================================================
 " Create menus not based on existing mappings:
 " =======================================================
-" Provide commands and descriptions for existing mappings
-" command, <Plug>/<C-W>/<C-d> mapping are supported
+" Provide commands(ex-command, <Plug>/<C-W>/<C-d> mapping, etc.) and descriptions for existing mappings
 let g:which_key_map.b = {
       \ 'name' : '+buffer' ,
       \ '1' : ['b1'        , 'buffer 1']        ,
@@ -202,7 +203,7 @@ let g:which_key_map.l = {
         \ 'name': '+goto',
         \ 'd' : ['LanguageClient#textDocument_definition()'     , 'definition']       ,
         \ 't' : ['LanguageClient#textDocument_typeDefinition()' , 'type-definition']  ,
-        \ 'i' : ['LanguageClient#textDocument_implementation()'  , 'implementation']   ,
+        \ 'i' : ['LanguageClient#textDocument_implementation()'  , 'implementation']  ,
         \ },
       \ }
 ```
