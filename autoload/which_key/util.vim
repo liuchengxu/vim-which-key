@@ -174,6 +174,12 @@ function! which_key#util#string_to_keys(input)
   endif
 endfunction " }}}
 
+function! which_key#util#mismatch() abort
+  echohl ErrorMsg
+  echom "Fail to execute, no such mapping"
+  echohl None
+endfunction
+
 function! which_key#util#format(mapping) abort
   let l:ret = a:mapping
   let l:ret = substitute(l:ret, '\c<cr>$', '', '')

@@ -72,6 +72,21 @@ function! s:merge(dict_t, dict_o) " {{{
     endif
   endfor
 
+  for [key, value] in items(target)
+    if key == 'name'
+      continue
+    endif
+    if type(value) == s:TYPE.string
+      if key == '<Tab>' && has_key(other, '<C-I>')
+        let target[key] = [other['<C-I>'][0], value]
+      else
+        let target[key] = [
+              \ has_key(other, key) ? other[key][0] : 'which_key#util#mismatch()',
+            \ value ]
+      endif
+    endif
+  endfor
+
   if has_key(other, '<C-I>')
     if !has_key(target, '<Tab>')
       let target['<Tab>'] = other['<C-I>']

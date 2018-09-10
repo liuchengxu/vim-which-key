@@ -101,20 +101,20 @@ Please note that no matter which mappings and menus you configure, your original
 
 `:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
 
+Assuming your `leader` and `localleader` key are `<Space>` and `,`, respectively, even no description dictionary has been registered, all `<Space>` and `,` related mappings will be displayed regardless.
+
 ```vim
-" Assume your leader and localleader key are `<Space>` and `,`, respectively
-" Even no description dictionary is registered, all `<Space>` and `,` related mappins will be displayed regardless.
-" However, these displayed content is normally not adequate to serve as a cheatsheet.
-" See the following section for configuring it properly.
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
 ```
+
+The raw content displayed is normally not adequate to serve as a cheatsheet. See the following section for configuring it properly.
 
 If no description dictionary is available, the right-hand-side of all mappings will be displayed:
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/raw-spc-w.png"></p>
 
-However, the dictionary configuration is necessary to provide group names or a description text.
+The dictionary configuration is necessary to provide group names or a description text.
 
 ```vim
 let g:which_key_map['w'] = {
@@ -150,28 +150,34 @@ Refer to [space-vim](https://github.com/liuchengxu/space-vim/blob/master/core/au
 let g:which_key_map =  {}
 
 " Second level dictionaries:
-" 'name' is a special field. It will define the name of the group.
-" leader-f is the "+file" group.
-" Unnamed groups will show a default string
+" 'name' is a special field. It will define the name of the group, e.g., leader-f is the "+file" group.
+" Unnamed groups will show a default empty string.
+
+" =======================================================
+" Create menus based on existing mappings
+" =======================================================
+" You can pass a descriptive text to an existing mapping.
+
 let g:which_key_map.f = { 'name' : '+file' }
 
 nnoremap <silent> <leader>fs :update<CR>
-let g:which_key_map.f.s = ['update', 'save-file']
+let g:which_key_map.f.s = 'save-file'
 
-" Provide commands and descriptions for existing mappings
-" command, <Plug>/<C-W>/<C-d> mapping are supported
 nnoremap <silent> <leader>fd :e $MYVIMRC<CR>
-let g:which_key_map.f.d = ['e $MYVIMRC', 'open-vimrc']
-
-let g:which_key_map.o = { 'name' : '+open' }
+let g:which_key_map.f.d = 'open-vimrc'
 
 nnoremap <silent> <leader>oq  :copen<CR>
-let g:which_key_map.o.q = ['copen', 'open-quickfix']
-
 nnoremap <silent> <leader>ol  :lopen<CR>
-let g:which_key_map.o.l = ['lopen', 'open-locationlist']
+let g:which_key_map.o = {
+      \ 'name' : '+open',
+      \ 'q' : 'open-quickfix'    ,
+      \ 'l' : 'open-locationlist',
+      \ }
 
-" Create new menus not based on existing mappings:
+" =======================================================
+" Create menus not based on existing mappings:
+" =======================================================
+" Provide commands(ex-command, <Plug>/<C-W>/<C-d> mapping, etc.) and descriptions for existing mappings
 let g:which_key_map.b = {
       \ 'name' : '+buffer' ,
       \ '1' : ['b1'        , 'buffer 1']        ,
@@ -197,7 +203,7 @@ let g:which_key_map.l = {
         \ 'name': '+goto',
         \ 'd' : ['LanguageClient#textDocument_definition()'     , 'definition']       ,
         \ 't' : ['LanguageClient#textDocument_typeDefinition()' , 'type-definition']  ,
-        \ 'i' : ['LanguageClient#textDocument_implementation()'  , 'implementation']   ,
+        \ 'i' : ['LanguageClient#textDocument_implementation()'  , 'implementation']  ,
         \ },
       \ }
 ```
