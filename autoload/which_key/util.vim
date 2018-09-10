@@ -18,7 +18,7 @@ function! which_key#util#calc_layout(mappings) abort
   let smap = filter(copy(a:mappings), 'v:key !=# "name"')
   let layout.n_items = len(smap)
   let length = values(map(smap,
-        \ 'strdisplaywidth(v:key.'.
+        \ 'strdisplaywidth(get(s:displaynames, toupper(v:key), v:key).'.
         \ '(type(v:val) == type({}) ? v:val["name"] : v:val[1]))'))
 
   let maxlength = max(length) + g:which_key_hspace
