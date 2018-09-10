@@ -101,7 +101,7 @@ Please note that no matter which mappings and menus you configure, your original
 
 `:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
 
-Assuming your `leader` and `localleader` key are `<Space>` and `,`, respectively, even no description dictionary has registered, all `<Space>` and `,` related mappings will be displayed regardless.
+Assuming your `leader` and `localleader` key are `<Space>` and `,`, respectively, even no description dictionary has been registered, all `<Space>` and `,` related mappings will be displayed regardless.
 
 ```vim
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
