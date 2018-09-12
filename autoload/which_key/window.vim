@@ -47,6 +47,7 @@ function! s:open() abort
   endif
 
   setlocal filetype=which_key
+  setlocal nonumber norelativenumber
 
   let s:winnr = winnr()
 
