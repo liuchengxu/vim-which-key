@@ -50,51 +50,53 @@ function! s:create_target_dict(key) " {{{
   return tardict
 endfunction
 
-function! s:merge(dict_t, dict_o) " {{{
-  let target = a:dict_t
-  let other = a:dict_o
+function! s:merge(target, native) " {{{
+  let target = a:target
+  let native = a:native
+
   for k in keys(target)
-    if type(target[k]) == s:TYPE.dict && has_key(other, k)
-      if type(other[k]) == type({})
+
+    if type(target[k]) == s:TYPE.dict && has_key(native, k)
+
+      if type(native[k]) == s:TYPE.dict
         if has_key(target[k], 'name')
-          let other[k].name = target[k].name
+          let native[k].name = target[k].name
         endif
-        call s:merge(target[k], other[k])
-      elseif type(other[k]) == s:TYPE.list
+        call s:merge(target[k], native[k])
+      elseif type(native[k]) == s:TYPE.list
         if g:which_key_flatten == 0 || type(target[k]) == s:TYPE.dict
           let target[k.'m'] = target[k]
         endif
-        let target[k] = other[k]
-        if has_key(other, k.'m') && type(other[k.'m']) == s:TYPE.dict
-          call s:merge(target[k.'m'], other[k.'m'])
+        let target[k] = native[k]
+        if has_key(native, k.'m') && type(native[k.'m']) == s:TYPE.dict
+          call s:merge(target[k.'m'], native[k.'m'])
         endif
       endif
-    endif
-  endfor
 
-  for [key, value] in items(target)
-    if key == 'name'
-      continue
-    endif
-    if type(value) == s:TYPE.string
-      if key == '<Tab>' && has_key(other, '<C-I>')
-        let target[key] = [other['<C-I>'][0], value]
+    " Support add a description to an existing map without dual definition
+    elseif type(target[k]) == s:TYPE.string && k != 'name'
+
+      " <Tab> <C-I>
+      if k == '<Tab>' && has_key(native, '<C-I>')
+        let target[k] = [native['<C-I>'][0], target[k]]
       else
-        let target[key] = [
-              \ has_key(other, key) ? other[key][0] : 'which_key#util#mismatch()',
-            \ value ]
+        let target[k] = [
+              \ has_key(native, k) ? native[k][0] : 'which_key#util#mismatch()',
+            \ target[k] ]
       endif
+
     endif
+
   endfor
 
-  if has_key(other, '<C-I>')
+  if has_key(native, '<C-I>')
     if !has_key(target, '<Tab>')
-      let target['<Tab>'] = other['<C-I>']
+      let target['<Tab>'] = native['<C-I>']
     endif
-    call remove(other, '<C-I>')
+    call remove(native, '<C-I>')
   endif
 
-  call extend(target, other, 'keep')
+  call extend(target, native, 'keep')
 endfunction
 
 function! s:prompt() abort
