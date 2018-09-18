@@ -53,6 +53,7 @@ function! which_key#util#create_string(layout, mappings) abort
   let row = 0
   let col = 0
   let smap = sort(filter(keys(mappings), 'v:val !=# "name"'),'1')
+
   for k in smap
     let key = get(s:displaynames, toupper(k), k)
     let desc = type(mappings[k]) == type({}) ? mappings[k].name : mappings[k][1]
@@ -91,20 +92,9 @@ function! which_key#util#create_string(layout, mappings) abort
     silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
   endfor
 
-  let r = []
-  let mlen = 0
-  for ro in rows
-    let line = join(ro, '')
-    call add(r, line)
-    if strdisplaywidth(line) > mlen
-      let mlen = strdisplaywidth(line)
-    endif
-  endfor
+  call map(rows, 'join(v:val, "")')
 
-  call insert(r, '')
-  let output = join(r, "\n ")
-
-  return output
+  return rows
 endfunction " }}}
 
 function! s:escape_keys(inp) abort
@@ -139,13 +129,13 @@ function! which_key#util#get_register() "{{{
   return s:reg
 endfunction "}}}
 
-function! which_key#util#escape_mappings(mapping) abort" {{{
+function! which_key#util#escape_mappings(mapping) abort " {{{
   let feedkeyargs = a:mapping.noremap ? "nt" : "mt"
-  let rstring = substitute(a:mapping.rhs, '\', '\\\\', 'g')
-  let rstring = substitute(rstring, '<\([^<>]*\)>', '\\<\1>', 'g')
-  let rstring = substitute(rstring, '"', '\\"', 'g')
-  let rstring = 'call feedkeys("'.rstring.'", "'.feedkeyargs.'")'
-  return rstring
+  let rhs = substitute(a:mapping.rhs, '\', '\\\\', 'g')
+  let rhs = substitute(rhs, '<\([^<>]*\)>', '\\<\1>', 'g')
+  let rhs = substitute(rhs, '"', '\\"', 'g')
+  let rhs = 'call feedkeys("'.rhs.'", "'.feedkeyargs.'")'
+  return rhs
 endfunction " }}}
 
 function! which_key#util#get_sep() abort

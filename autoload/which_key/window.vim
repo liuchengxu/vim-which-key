@@ -10,15 +10,12 @@ function! which_key#window#open(runtime) abort
 
   let runtime = a:runtime
   let layout = which_key#util#calc_layout(runtime)
-  let string = which_key#util#create_string(layout, runtime)
+  let rows = which_key#util#create_string(layout, runtime)
 
   let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
   noautocmd execute resize layout.win_dim
 
-  setlocal modifiable
-  silent 1put!=string
-  silent normal! gg"_dd
-  setlocal nomodifiable
+  call setline(1, rows)
 
   call which_key#wait_for_input()
 endfunction
