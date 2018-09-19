@@ -268,10 +268,10 @@ which_key#register({prefix}, {dict})                    *which_key#register()*
   Example:
 >
     " register dictionary for the <Space>-prefix
-    call leaderGuide#register_prefix_descriptions(' ', "g:space_prefix_dict")
+    call which_key#register(' ', "g:space_prefix_dict")
 
     " register dictionary for the ,-prefix
-    call leaderGuide#register_prefix_descriptions(',', "g:comma_prefix_dict")
+    call which_key#register(',', "g:comma_prefix_dict")
 <
 
 which_key#start({vis}, {bang}, {prefix})                   *which_key#start()*
