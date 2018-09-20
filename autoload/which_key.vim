@@ -10,17 +10,17 @@ endfunction
 
 function! which_key#start(vis, bang, prefix) " {{{
   let s:vis = a:vis ? 'gv' : ''
+  let s:count = v:count != 0 ? v:count : ''
+
   if a:bang
     let s:runtime = a:prefix
     call which_key#window#open(s:runtime)
     return
   endif
 
-  let s:count = v:count != 0 ? v:count : ''
-  let s:toplevel = a:prefix ==# 'top' ? 1 : 0
-
   let key = a:prefix
-  let s:cur_trigger = a:prefix
+
+  let s:which_key_trigger = key ==# ' ' ? 'SPC' : key
 
   if !has_key(s:cache, key) || g:which_key_run_map_on_popup
     " First run
@@ -28,26 +28,22 @@ function! which_key#start(vis, bang, prefix) " {{{
     call which_key#map#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
   endif
 
-  let s:runtime = has_key(s:desc, key) || has_key(s:desc , 'top') ? s:create_target_dict(key) : s:cache[key]
-  let s:which_key_trigger = key ==# ' ' ? 'SPC' : key
-
+  " s:runtime is a dictionary combining the native key mapping dictionary
+  " parsed by vim-which-key itself with user defined prefix dictionary if avaliable.
+  let s:runtime = s:create_runtime(key)
   call which_key#window#open(s:runtime)
 endfunction
 
-function! s:create_target_dict(key) " {{{
-  if has_key(s:desc, 'top')
-    let toplevel = deepcopy({s:desc['top']})
-    let tardict = s:toplevel ? toplevel : get(toplevel, a:key, {})
-    let mapdict = s:cache[a:key]
-    call s:merge(tardict, mapdict)
-  elseif has_key(s:desc, a:key)
-    let tardict = deepcopy({s:desc[a:key]})
-    let mapdict = s:cache[a:key]
-    call s:merge(tardict, mapdict)
+function! s:create_runtime(key)
+  let key = a:key
+  if has_key(s:desc, key)
+    let runtime = deepcopy({s:desc[key]})
+    let native = s:cache[key]
+    call s:merge(runtime, native)
   else
-    let tardict = s:cache[a:key]
+    let runtime = s:cache[key]
   endif
-  return tardict
+  return runtime
 endfunction
 
 function! s:merge(target, native) " {{{
