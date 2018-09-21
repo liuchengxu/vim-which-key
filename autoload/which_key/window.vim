@@ -3,21 +3,8 @@ let s:winnr = -1
 
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
-
-  let s:name = get(a:runtime, 'name', '')
-
   call s:open()
-
-  let runtime = a:runtime
-  let layout = which_key#util#calc_layout(runtime)
-  let rows = which_key#util#create_string(layout, runtime)
-
-  let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-  noautocmd execute resize layout.win_dim
-
-  call setline(1, rows)
-
-  call which_key#wait_for_input()
+  call which_key#window#fill(a:runtime)
 endfunction
 
 function! s:open() abort
@@ -55,6 +42,21 @@ function! s:open() abort
     execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
   augroup END
   setlocal t_ve=
+endfunction
+
+function! which_key#window#fill(runtime) abort
+  let runtime = a:runtime
+
+  let s:name = get(runtime, 'name', '')
+
+  let layout = which_key#util#calc_layout(runtime)
+  let rows = which_key#util#create_string(layout, runtime)
+
+  let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+  noautocmd execute resize layout.win_dim
+  call setline(1, rows)
+
+  call which_key#wait_for_input()
 endfunction
 
 function! which_key#window#close() abort

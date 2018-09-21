@@ -147,14 +147,17 @@ function! which_key#wait_for_input() " {{{
 endfunction
 
 function! s:handle_input(input) " {{{
-  call which_key#window#close()
-
   let type = type(a:input)
 
   if type ==? s:TYPE.dict
     let s:runtime = a:input
-    call which_key#window#open(s:runtime)
-  elseif type ==? s:TYPE.list
+    call which_key#window#fill(s:runtime)
+    return
+  endif
+
+  call which_key#window#close()
+
+  if type ==? s:TYPE.list
     call s:execute(a:input[0])
   else
     redraw!
