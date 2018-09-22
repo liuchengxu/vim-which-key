@@ -54,7 +54,9 @@ function! which_key#window#fill(runtime) abort
 
   let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
   noautocmd execute resize layout.win_dim
+  setlocal modifiable
   call setline(1, rows)
+  setlocal nomodifiable
 
   call which_key#wait_for_input()
 endfunction
