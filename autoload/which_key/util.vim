@@ -9,8 +9,9 @@ let g:which_key#util#TYPE = {
 
 let s:displaynames = {
       \ ' ': 'SPC',
-      \ '<C-H>': '<BS>',
-      \ '<C-I>': '<Tab>',
+      \ '<C-H>': 'BS',
+      \ '<C-I>': 'TAB',
+      \ '<TAB>': 'TAB',
       \ }
 
 function! which_key#util#calc_layout(mappings) abort
@@ -66,8 +67,7 @@ function! which_key#util#create_string(layout, mappings) abort
     if empty(crow)
       call add(rows, crow)
     endif
-    call add(crow, item)
-    call add(crow, repeat(' ', l.col_width - strdisplaywidth(item)))
+    call add(crow, item.repeat(' ', l.col_width - strdisplaywidth(item)))
 
     if !g:which_key_sort_horizontal
       if row >= n_rows - 1
@@ -91,6 +91,28 @@ function! which_key#util#create_string(layout, mappings) abort
     endif
     silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
   endfor
+
+  if get(g:, 'which_key_align_by_seperator', 1)
+    for i in range(0, col-1)
+      let cur_col = []
+      for j in range(0, n_rows)
+        if i < len(rows[j])
+          call add(cur_col, rows[j][i])
+        endif
+      endfor
+      let cur_col_keys = map(cur_col, 'strdisplaywidth(split(v:val)[0])')
+      let [max_key_len, min_key_len] = [max(cur_col_keys), min(cur_col_keys)]
+      if max_key_len != min_key_len
+        for j in range(0, n_rows)
+          if i < len(rows[j])
+            let key = split(rows[j][i])[0]
+            let len = strdisplaywidth(key)
+            let rows[j][i] = repeat(' ', max_key_len-len).rows[j][i][0:(l.col_width + 1 - (max_key_len -len))]
+          endif
+        endfor
+      endif
+    endfor
+  endif
 
   call map(rows, 'join(v:val, "")')
 

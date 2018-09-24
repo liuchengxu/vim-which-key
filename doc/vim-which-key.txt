@@ -196,6 +196,15 @@ Possible value: {0, 1}. By default it's 0.
 >
   let g:which_key_sort_horizontal = 0
 <
+                                              *g:which_key_align_by_seperator*
+If set to a value other than 1, the entries of each column will be align by
+the initial char instead of the seperator.
+
+Possible value: {0, 1}. By default it's 1.
+>
+  let g:which_key_align_by_seperator = 1
+<
+
 
                                                 *g:which_key_run_map_on_popup*
 Mappings change during a vim-session, e.g., changing the filetype or buffer.
