@@ -16,7 +16,7 @@ let g:which_key_vertical = get(g:, 'which_key_vertical', 0)
 let g:which_key_position = get(g:, 'which_key_position', 'botright')
 let g:which_key_sort_horizontal = get(g:, 'which_key_sort_horizontal', 0)
 let g:which_key_run_map_on_popup = get(g:, 'which_key_run_map_on_popup', 1)
-let g:which_key_default_group_name = get(g:, 'which_key_default_group_name', '')
+let g:which_key_default_group_name = get(g:, 'which_key_default_group_name', '+prefix')
 let g:WhichKeyFormatFunc = get(g:, 'WhichKeyFormatFunc', function('which_key#util#format'))
 
 command! -bang -nargs=1 WhichKey call which_key#start(0, <bang>0, <args>)
