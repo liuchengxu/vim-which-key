@@ -39,8 +39,17 @@ function! which_key#start(vis, bang, prefix) " {{{
         let c = getchar()
         let char = c == 9 ? '<Tab>' : nr2char(c)
         let s:which_key_trigger .= ' '.char
-        if type(get(s:runtime, char)) == s:TYPE.dict
-          let s:runtime = s:runtime[char]
+        let next_level = get(s:runtime, char)
+        if type(next_level) == s:TYPE.dict
+          let s:runtime = next_level
+        elseif type(next_level) == s:TYPE.list
+          call s:execute(next_level[0])
+          return
+        else
+          echohl ErrorMsg
+          echom s:which_key_trigger.' is undefined'
+          echohl None
+          return
         endif
       else
         break
