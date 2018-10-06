@@ -60,13 +60,13 @@ function! s:merge(target, native) " {{{
         endif
         call s:merge(target[k], native[k])
       elseif type(native[k]) == s:TYPE.list
-        if g:which_key_flatten == 0 || type(target[k]) == s:TYPE.dict
-          let target[k.'m'] = target[k]
-        endif
+        " if g:which_key_flatten == 0 || type(target[k]) == s:TYPE.dict
+          " let target[k.'m'] = target[k]
+        " endif
         let target[k] = native[k]
-        if has_key(native, k.'m') && type(native[k.'m']) == s:TYPE.dict
-          call s:merge(target[k.'m'], native[k.'m'])
-        endif
+        " if has_key(native, k.'m') && type(native[k.'m']) == s:TYPE.dict
+          " call s:merge(target[k.'m'], native[k.'m'])
+        " endif
       endif
 
     " Support add a description to an existing map without dual definition
@@ -106,31 +106,55 @@ function! s:prompt() abort
   echohl None
 endfunction
 
+" Returns true if timed out
+function! s:wait_with_timeout(timeout)
+  let timeout = a:timeout
+  while timeout >= 0
+    if getchar(1)
+      return 0
+    endif
+    if timeout > 0
+      sleep 20m
+    endif
+    let timeout -= 20
+  endwhile
+  return 1
+endfunction
+
+function! s:has_child(input) abort
+  let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
+  let group = filter(group, 'v:val == 1')
+  return len(group) > 1
+endfunction
+
 function! s:getchar() abort
+  let input = ''
   try
     let c = getchar()
   " Handle <C-C>
   catch /^Vim:Interrupt$/
-    let c = 27
-  endtry
-
-  " <Esc>, <C-[>: 27
-  if c == 27
+    " <Esc>, <C-[>: 27
     call which_key#window#close()
     redraw!
     return ''
+  endtry
+
+  " <Tab>, <C-I> = 9
+  let input .= c == 9 ? '<Tab>' : nr2char(c)
+
+  if s:has_child(input)
+    let timeout = get(g:, 'vim_which_key_timeout', &timeoutlen)
+    while 1
+      if !s:wait_with_timeout(timeout)
+        let c = getchar()
+        let input .= c == 9 ? '<Tab>' : nr2char(c)
+      else
+        break
+      endif
+    endwhile
   endif
 
-  " <Tab>, <C-I>
-  if c == 9
-    return '<Tab>'
-  endif
-
-  if c =~? '^\d\+$' || type(c) == type(0)
-    return nr2char(c)
-  else
-    return ''
-  endif
+  return input
 endfunction
 
 function! which_key#wait_for_input() " {{{
