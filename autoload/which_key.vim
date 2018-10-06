@@ -31,6 +31,23 @@ function! which_key#start(vis, bang, prefix) " {{{
   " s:runtime is a dictionary combining the native key mapping dictionary
   " parsed by vim-which-key itself with user defined prefix dictionary if avaliable.
   let s:runtime = s:create_runtime(key)
+
+  if getchar(1)
+    let timeout = get(g:, 'vim_which_key_timeout', &timeoutlen)
+    while 1
+      if !s:wait_with_timeout(timeout)
+        let c = getchar()
+        let char = c == 9 ? '<Tab>' : nr2char(c)
+        let s:which_key_trigger .= ' '.char
+        if type(get(s:runtime, char)) == s:TYPE.dict
+          let s:runtime = s:runtime[char]
+        endif
+      else
+        break
+      endif
+    endwhile
+  endif
+
   call which_key#window#open(s:runtime)
 endfunction
 
