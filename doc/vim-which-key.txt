@@ -237,9 +237,17 @@ WhichKeyFormatFunc is a Funcref called on every display item, which could be
 used to hide all trailing <CR> as well as all leading <Plug> substring in the
 guide buffer.
 
-Possible value: Funcref. By default it's function('which_key#util#format').
+Possible value: Funcref. By default it's `function('which_key#util#format')`.
 >
   let g:WhichKeyFormatFunc = function('which_key#util#format')
+<
+
+                                                        *g:which_key_timeout*
+Similar to `timeoutlen`, but for vim-which-key particularly.
+
+Possible value: {Number}. By default it's same with option `timeoutlen`.
+>
+  let g:which_key_timeout = 300
 <
 
 ==============================================================================
