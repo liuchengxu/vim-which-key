@@ -26,7 +26,7 @@
 
 vim-which-key is vim port of [emacs-which-key](https://github.com/justbur/emacs-which-key) that displays available keybindings in popup.
 
-[emacs-which-key](https://github.com/justbur/emacs-which-key) started as a rewrite of [guide-key](https://github.com/kai2nenobu/guide-key), very likely, [vim-which-key](https://github.com/liuchengxu/vim-which-key) heavily rewrote [vim-leader-guide](https://github.com/hecal3/vim-leader-guide) with a goal of going further in vim world. The features of vim-which-key has evolved a lot since then.
+[emacs-which-key](https://github.com/justbur/emacs-which-key) started as a rewrite of [guide-key](https://github.com/kai2nenobu/guide-key), very likely, [vim-which-key](https://github.com/liuchengxu/vim-which-key) heavily rewrote [vim-leader-guide](https://github.com/hecal3/vim-leader-guide). The features of vim-which-key has evolved a lot since then.
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/vim-which-key.png"></p>
 
@@ -105,6 +105,8 @@ Please note that no matter which mappings and menus you configure, your original
 Assuming your `leader` and `localleader` key are `<Space>` and `,`, respectively, even no description dictionary has been registered, all `<Space>` and `,` related mappings will be displayed regardless.
 
 ```vim
+let g:mapleader = "\<Space>"
+let g:maplocalleader = ','
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
 ```

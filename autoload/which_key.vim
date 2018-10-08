@@ -33,9 +33,8 @@ function! which_key#start(vis, bang, prefix) " {{{
   let s:runtime = s:create_runtime(key)
 
   if getchar(1)
-    let timeout = get(g:, 'vim_which_key_timeout', &timeoutlen)
     while 1
-      if !s:wait_with_timeout(timeout)
+      if !s:wait_with_timeout(g:which_key_timeout)
         let c = getchar()
         let char = c == 9 ? '<Tab>' : nr2char(c)
         let s:which_key_trigger .= ' '.char
@@ -169,9 +168,8 @@ function! s:getchar() abort
   let input .= c == 9 ? '<Tab>' : nr2char(c)
 
   if s:has_child(input)
-    let timeout = get(g:, 'vim_which_key_timeout', &timeoutlen)
     while 1
-      if !s:wait_with_timeout(timeout)
+      if !s:wait_with_timeout(g:which_key_timeout)
         let c = getchar()
         let input .= c == 9 ? '<Tab>' : nr2char(c)
       else
