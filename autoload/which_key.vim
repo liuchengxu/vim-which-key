@@ -34,24 +34,25 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   if getchar(1)
     while 1
-      if !s:wait_with_timeout(g:which_key_timeout)
-        let c = getchar()
-        let char = c == 9 ? '<Tab>' : nr2char(c)
-        let s:which_key_trigger .= ' '.char
-        let next_level = get(s:runtime, char)
-        if type(next_level) == s:TYPE.dict
-          let s:runtime = next_level
-        elseif type(next_level) == s:TYPE.list
-          call s:execute(next_level[0])
-          return
-        else
-          echohl ErrorMsg
-          echom s:which_key_trigger.' is undefined'
-          echohl None
-          return
-        endif
+      let c = getchar()
+      let char = c == 9 ? '<Tab>' : nr2char(c)
+      let s:which_key_trigger .= ' '.char
+      let next_level = get(s:runtime, char)
+      if type(next_level) == s:TYPE.dict
+        let s:runtime = next_level
+      elseif type(next_level) == s:TYPE.list
+        call s:execute(next_level[0])
+        return
       else
+        echohl ErrorMsg
+        echom s:which_key_trigger.' is undefined'
+        echohl None
+        return
+      endif
+      if s:wait_with_timeout(g:which_key_timeout)
         break
+      else
+        continue
       endif
     endwhile
   endif
