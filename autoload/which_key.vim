@@ -51,8 +51,6 @@ function! which_key#start(vis, bang, prefix) " {{{
       endif
       if s:wait_with_timeout(g:which_key_timeout)
         break
-      else
-        continue
       endif
     endwhile
   endif
