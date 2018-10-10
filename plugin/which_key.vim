@@ -11,11 +11,13 @@ set cpo&vim
 let g:which_key_sep = get(g:, 'which_key_sep', '→')
 let g:which_key_hspace = get(g:, 'which_key_hspace', 5)
 let g:which_key_flatten = get(g:, 'which_key_flatten', 1)
+let g:which_key_timeout = get(g:, 'which_key_timeout', &timeoutlen)
 let g:which_key_max_size = get(g:, 'which_key_max_size', 0)
 let g:which_key_vertical = get(g:, 'which_key_vertical', 0)
 let g:which_key_position = get(g:, 'which_key_position', 'botright')
 let g:which_key_sort_horizontal = get(g:, 'which_key_sort_horizontal', 0)
 let g:which_key_run_map_on_popup = get(g:, 'which_key_run_map_on_popup', 1)
+let g:which_key_align_by_seperator = get(g:, 'which_key_align_by_seperator', 1)
 let g:which_key_default_group_name = get(g:, 'which_key_default_group_name', '+prefix')
 let g:WhichKeyFormatFunc = get(g:, 'WhichKeyFormatFunc', function('which_key#util#format'))
 
