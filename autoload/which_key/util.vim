@@ -14,7 +14,7 @@ let s:displaynames = {
       \ '<TAB>': 'TAB',
       \ }
 
-function! which_key#util#calc_layout(mappings) abort
+function! which_key#util#calc_layout(mappings) abort " {{{
   let layout = {}
   let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == type([]) && v:val[1] == "which_key_ignore")')
   let layout.n_items = len(smap)
@@ -42,7 +42,7 @@ function! which_key#util#calc_layout(mappings) abort
   return layout
 endfunction " }}}
 
-function! which_key#util#create_string(layout, mappings) abort
+function! which_key#util#create_rows(layout, mappings) abort
   let l = a:layout
   let mappings = a:mappings
   let l.capacity = l.n_rows * l.n_cols
@@ -119,7 +119,7 @@ function! which_key#util#create_string(layout, mappings) abort
   return rows
 endfunction " }}}
 
-function! s:escape_keys(inp) abort
+function! s:escape_keys(inp) abort " {{{
   " :h <>
   let l:ret = a:inp
   let l:ret = substitute(l:ret, "<", "<lt>", "")
@@ -144,9 +144,9 @@ endfunction
 
 function! which_key#util#get_register() "{{{
  if has('nvim') && !exists('s:reg')
-      let s:reg = ''
+    let s:reg = ''
   else
-      let s:reg = v:register != s:register() ? '"'.v:register : ''
+    let s:reg = v:register != s:register() ? '"'.v:register : ''
   endif
   return s:reg
 endfunction "}}}
@@ -165,33 +165,35 @@ function! which_key#util#get_sep() abort
 endfunction
 
 function! which_key#util#string_to_keys(input)
+  let input = a:input
   " Avoid special case: <>
-  if match(a:input, '<.\+>') != -1
+  if match(input, '<.\+>') != -1
+    echom "match input: ".input
     let retlist = []
     let si = 0
     let go = 1
-    while si < len(a:input)
+    while si < len(input)
       if go
-        call add(retlist, a:input[si])
+        call add(retlist, input[si])
       else
-        let retlist[-1] .= a:input[si]
+        let retlist[-1] .= input[si]
       endif
-      if a:input[si] ==? '<'
+      if input[si] ==? '<'
         let go = 0
-      elseif a:input[si] ==? '>'
+      elseif input[si] ==? '>'
         let go = 1
       end
       let si += 1
-    endw
+    endwhile
     return retlist
   else
-    return split(a:input, '\zs')
+    return split(input, '\zs')
   endif
 endfunction " }}}
 
 function! which_key#util#mismatch() abort
   echohl ErrorMsg
-  echom "Fail to execute, no such mapping"
+  echom '[which-key] Fail to execute, no such mapping'
   echohl None
 endfunction
 

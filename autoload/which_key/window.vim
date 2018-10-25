@@ -50,7 +50,7 @@ function! which_key#window#fill(runtime) abort
   let s:name = get(runtime, 'name', '')
 
   let layout = which_key#util#calc_layout(runtime)
-  let rows = which_key#util#create_string(layout, runtime)
+  let rows = which_key#util#create_rows(layout, runtime)
 
   let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
   noautocmd execute resize layout.win_dim
