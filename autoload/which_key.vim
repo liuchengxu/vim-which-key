@@ -12,15 +12,14 @@ function! which_key#start(vis, bang, prefix) " {{{
   let s:vis = a:vis ? 'gv' : ''
   let s:count = v:count != 0 ? v:count : ''
 
+  let key = a:prefix
+  let s:which_key_trigger = key ==# ' ' ? 'SPC' : key
+
   if a:bang
     let s:runtime = a:prefix
     call which_key#window#open(s:runtime)
     return
   endif
-
-  let key = a:prefix
-
-  let s:which_key_trigger = key ==# ' ' ? 'SPC' : key
 
   if !has_key(s:cache, key) || g:which_key_run_map_on_popup
     " First run
