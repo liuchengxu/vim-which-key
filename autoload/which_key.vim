@@ -241,7 +241,7 @@ function! s:execute(cmd) abort
 endfunction
 
 function! which_key#statusline() abort
-  let key = '%#WhichKeyTrigger# %{s:which_key_trigger} %*'
+  let key = '%#WhichKeyTrigger# %{get(s:, "which_key_trigger", "")} %*'
   let name = '%#WhichKeyName# %{which_key#window#name()} %*'
   return key.name
 endfunction

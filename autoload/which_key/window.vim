@@ -73,5 +73,5 @@ function! which_key#window#close() abort
 endfunction
 
 function! which_key#window#name() abort
-  return s:name
+  return get(s:, 'name', '')
 endfunction
