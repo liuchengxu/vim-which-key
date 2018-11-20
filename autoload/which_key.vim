@@ -156,11 +156,17 @@ function! s:getchar() abort
     let c = getchar()
   " Handle <C-C>
   catch /^Vim:Interrupt$/
-    " <Esc>, <C-[>: 27
     call which_key#window#close()
     redraw!
     return ''
   endtry
+
+  " <Esc>, <C-[>: 27
+  if c == 27
+    call which_key#window#close()
+    redraw!
+    return ''
+  endif
 
   " <Tab>, <C-I> = 9
   let input .= c == 9 ? '<Tab>' : nr2char(c)
