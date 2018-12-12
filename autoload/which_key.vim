@@ -237,7 +237,7 @@ function! s:execute(cmd) abort
     endif
     if Cmd =~? '^<Plug>.\+' || Cmd =~? '^<C-W>.\+' || Cmd =~? '^<.\+>$'
       let Cmd = s:join('call', 'feedkeys("\'.Cmd.'")')
-    elseif Cmd =~? '.(*)$' && match(Cmd, 'call') == -1
+    elseif Cmd =~? '.(*)$' && match(Cmd, '\<call\>') == -1
       let Cmd = s:join('call', Cmd)
     endif
     execute Cmd
