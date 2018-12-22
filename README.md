@@ -28,7 +28,11 @@ vim-which-key is vim port of [emacs-which-key](https://github.com/justbur/emacs-
 
 [emacs-which-key](https://github.com/justbur/emacs-which-key) started as a rewrite of [guide-key](https://github.com/kai2nenobu/guide-key), very likely, [vim-which-key](https://github.com/liuchengxu/vim-which-key) heavily rewrote [vim-leader-guide](https://github.com/hecal3/vim-leader-guide). The features of vim-which-key has evolved a lot since then.
 
-<p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/vim-which-key.png"></p>
+<p align="center">
+    <img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/vim-which-key.png">
+    <br />
+    Vim config in the screenshot is <a href="https://github.com/liuchengxu/space-vim">space-vim</a>.
+</p>
 
 ## Pros.
 
