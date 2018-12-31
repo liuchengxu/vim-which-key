@@ -21,3 +21,8 @@ let &l:statusline = which_key#statusline()
 
 hi WhichKeyTrigger ctermfg=232 ctermbg=178 guifg=#333300 guibg=#ffbb7d
 hi WhichKeyName cterm=bold ctermfg=171 ctermbg=239 gui=bold guifg=#d75fd7 guibg=#4e4e4e
+
+augroup which_key_resize
+  autocmd!
+  autocmd VimResized <buffer> call which_key#window#reopen()
+augroup END

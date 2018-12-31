@@ -72,6 +72,13 @@ function! which_key#window#close() abort
   endif
 endfunction
 
+function! which_key#window#reopen() abort
+  let runtime = which_key#runtime()
+  if !empty(runtime)
+    call which_key#window#fill(runtime)
+  endif
+endfunction
+
 function! which_key#window#name() abort
   return get(s:, 'name', '')
 endfunction

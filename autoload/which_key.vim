@@ -258,3 +258,7 @@ function! which_key#parse_mappings() " {{{
       call which_key#map#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
     endfor
 endfunction " }}}
+
+function! which_key#runtime() abort
+  return get(s:, 'runtime', '')
+endfunction
