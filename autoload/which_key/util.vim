@@ -151,15 +151,6 @@ function! which_key#util#get_register() "{{{
   return s:reg
 endfunction "}}}
 
-function! which_key#util#escape_mappings(mapping) abort " {{{
-  let feedkeyargs = a:mapping.noremap ? "nt" : "mt"
-  let rhs = substitute(a:mapping.rhs, '\', '\\\\', 'g')
-  let rhs = substitute(rhs, '<\([^<>]*\)>', '\\<\1>', 'g')
-  let rhs = substitute(rhs, '"', '\\"', 'g')
-  let rhs = 'call feedkeys("'.rhs.'", "'.feedkeyargs.'")'
-  return rhs
-endfunction " }}}
-
 function! which_key#util#get_sep() abort
   return get(g:, 'which_key_sep', '→')
 endfunction

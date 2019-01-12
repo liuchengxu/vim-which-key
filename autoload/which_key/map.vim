@@ -8,6 +8,7 @@ function! s:get_raw_key_mapping(key) abort
   return split(readmap, "\n")
 endfunction
 
+" Parse key-mappings gathered by `:map` and feed them into dict
 function! which_key#map#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? "<Space>" : a:key
   let visual = a:visual
@@ -43,7 +44,19 @@ function! which_key#map#parse(key, dict, visual) " {{{
   endfor
 endfunction
 
+function! s:escape(mapping) abort " {{{
+  let feedkeyargs = a:mapping.noremap ? "nt" : "mt"
+  let rhs = substitute(a:mapping.rhs, '\', '\\\\', 'g')
+  let rhs = substitute(rhs, '<\([^<>]*\)>', '\\<\1>', 'g')
+  let rhs = substitute(rhs, '"', '\\"', 'g')
+  let rhs = 'call feedkeys("'.rhs.'", "'.feedkeyargs.'")'
+  return rhs
+endfunction " }}}
+
 function! s:add_map_to_dict(map, level, dict) " {{{
+
+  let cmd = s:escape(a:map)
+
   if len(a:map.lhs) > a:level+1
     let curkey = a:map.lhs[a:level]
     let nlevel = a:level+1
@@ -51,40 +64,44 @@ function! s:add_map_to_dict(map, level, dict) " {{{
     if !has_key(a:dict, curkey)
       let a:dict[curkey] = { 'name' : g:which_key_default_group_name }
     " mapping defined already, flatten this map
-    elseif type(a:dict[curkey]) == s:TYPE.list && g:which_key_flatten
-      let cmd = which_key#util#escape_mappings(a:map)
-      let curkey = join(a:map.lhs[a:level+0:], '')
-      let nlevel = a:level
-      if !has_key(a:dict, curkey)
-        let a:dict[curkey] = [cmd, a:map.display]
-      endif
-    elseif type(a:dict[curkey]) == s:TYPE.list && g:which_key_flatten == 0
-      let cmd = which_key#util#escape_mappings(a:map)
-      let curkey = curkey.'m'
-      if !has_key(a:dict, curkey)
-        let a:dict[curkey] = { 'name' : g:which_key_default_group_name }
+    elseif type(a:dict[curkey]) == s:TYPE.list
+
+      if g:which_key_flatten
+        let curkey = join(a:map.lhs[a:level+0:], '')
+        let nlevel = a:level
+        if !has_key(a:dict, curkey)
+          let a:dict[curkey] = [cmd, a:map.display]
+        endif
+      else
+        let curkey = curkey.'m'
+        if !has_key(a:dict, curkey)
+          let a:dict[curkey] = { 'name' : g:which_key_default_group_name }
+        endif
       endif
     endif
     " next level
     if type(a:dict[curkey]) == s:TYPE.dict
       call s:add_map_to_dict(a:map, nlevel, a:dict[curkey])
     endif
+
   else
-    let cmd = which_key#util#escape_mappings(a:map)
+
     if !has_key(a:dict, a:map.lhs[a:level])
       let a:dict[a:map.lhs[a:level]] = [cmd, a:map.display]
     " spot is taken already, flatten existing submaps
     elseif type(a:dict[a:map.lhs[a:level]]) == s:TYPE.dict && g:which_key_flatten
-      let childmap = s:flattenmap(a:dict[a:map.lhs[a:level]], a:map.lhs[a:level])
+      let childmap = s:flatten(a:dict[a:map.lhs[a:level]], a:map.lhs[a:level])
       for it in keys(childmap)
         let a:dict[it] = childmap[it]
       endfor
       let a:dict[a:map.lhs[a:level]] = [cmd, a:map.display]
     endif
+
   endif
 endfunction
 
-function! s:flattenmap(dict, str) abort " {{{
+" Flatten map
+function! s:flatten(dict, str) abort
   let ret = {}
   for kv in keys(a:dict)
     if type(a:dict[kv]) == s:TYPE.list
@@ -93,7 +110,7 @@ function! s:flattenmap(dict, str) abort " {{{
       return toret
     elseif type(a:dict[kv]) == s:TYPE.dict
       let strcall = a:str.kv
-      call extend(ret, s:flattenmap(a:dict[kv], a:str.kv))
+      call extend(ret, s:flatten(a:dict[kv], a:str.kv))
     endif
   endfor
   return ret
