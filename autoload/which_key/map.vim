@@ -102,16 +102,16 @@ endfunction
 
 " Flatten map
 function! s:flatten(dict, str) abort
-  let ret = {}
+  let flat = {}
   for kv in keys(a:dict)
-    if type(a:dict[kv]) == s:TYPE.list
+    let ty = type(a:dict[kv])
+    if ty == s:TYPE.list
       let toret = {}
       let toret[a:str.kv] = a:dict[kv]
       return toret
-    elseif type(a:dict[kv]) == s:TYPE.dict
-      let strcall = a:str.kv
-      call extend(ret, s:flatten(a:dict[kv], a:str.kv))
+    elseif ty == s:TYPE.dict
+      call extend(flat, s:flatten(a:dict[kv], a:str.kv))
     endif
   endfor
-  return ret
+  return flat
 endfunction
