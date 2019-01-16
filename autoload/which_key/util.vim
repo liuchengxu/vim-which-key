@@ -64,6 +64,12 @@ function! which_key#util#mismatch() abort
   echohl None
 endfunction
 
+function! which_key#util#undefined(key) abort
+  echohl ErrorMsg
+  echom a:key.' is undefined'
+  echohl None
+endfunction
+
 function! which_key#util#format(mapping) abort
   let l:ret = a:mapping
   let l:ret = substitute(l:ret, '\c<cr>$', '', '')

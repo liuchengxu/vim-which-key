@@ -33,19 +33,26 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   if getchar(1)
     while 1
-      let c = getchar()
+      try
+        let c = getchar()
+      catch /^Vim:Interrupt$/
+        return ''
+      endtry
+      " <Esc>, <C-[>: 27
+      if c == 27
+        return ''
+      endif
       let char = c == 9 ? '<Tab>' : nr2char(c)
       let s:which_key_trigger .= ' '.char
       let next_level = get(s:runtime, char)
-      if type(next_level) == s:TYPE.dict
+      let ty = type(next_level)
+      if ty == s:TYPE.dict
         let s:runtime = next_level
-      elseif type(next_level) == s:TYPE.list
+      elseif ty == s:TYPE.list
         call s:execute(next_level[0])
         return
       else
-        echohl ErrorMsg
-        echom s:which_key_trigger.' is undefined'
-        echohl None
+        call which_key#util#undefined(s:which_key_trigger)
         return
       endif
       if s:wait_with_timeout(g:which_key_timeout)
@@ -199,9 +206,9 @@ function! which_key#wait_for_input() " {{{
 endfunction
 
 function! s:handle_input(input) " {{{
-  let type = type(a:input)
+  let ty = type(a:input)
 
-  if type ==? s:TYPE.dict
+  if ty ==? s:TYPE.dict
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
     return
@@ -209,13 +216,11 @@ function! s:handle_input(input) " {{{
 
   call which_key#window#close()
 
-  if type ==? s:TYPE.list
+  if ty ==? s:TYPE.list
     call s:execute(a:input[0])
   else
     redraw!
-    echohl ErrorMsg
-    echom s:which_key_trigger.' is undefined'
-    echohl None
+    call which_key#util#undefined(s:which_key_trigger)
   endif
 endfunction
 
