@@ -35,7 +35,6 @@ function! which_key#util#string_to_keys(input)
   let input = a:input
   " Avoid special case: <>
   if match(input, '<.\+>') != -1
-    echom "match input: ".input
     let retlist = []
     let si = 0
     let go = 1
