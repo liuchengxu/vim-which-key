@@ -80,41 +80,38 @@ function! s:merge(target, native) " {{{
   let target = a:target
   let native = a:native
 
-  for k in keys(target)
+  for [k, v] in items(target)
 
-    if type(target[k]) == s:TYPE.dict && has_key(native, k)
+    if type(v) == s:TYPE.dict && has_key(native, k)
 
       if type(native[k]) == s:TYPE.dict
-        if has_key(target[k], 'name')
-          let native[k].name = target[k].name
+        if has_key(v, 'name')
+          let native[k].name = v.name
         endif
         call s:merge(target[k], native[k])
       elseif type(native[k]) == s:TYPE.list
-        " if g:which_key_flatten == 0 || type(target[k]) == s:TYPE.dict
-          " let target[k.'m'] = target[k]
-        " endif
         let target[k] = native[k]
-        " if has_key(native, k.'m') && type(native[k.'m']) == s:TYPE.dict
-          " call s:merge(target[k.'m'], native[k.'m'])
-        " endif
       endif
 
     " Support add a description to an existing map without dual definition
-    elseif type(target[k]) == s:TYPE.string && k != 'name'
+    elseif type(v) == s:TYPE.string && k != 'name'
 
       " <Tab> <C-I>
       if k == '<Tab>' && has_key(native, '<C-I>')
-        let target[k] = [native['<C-I>'][0], target[k]]
+        let target[k] = [
+              \ native['<C-I>'][0],
+              \ v]
       else
         let target[k] = [
               \ has_key(native, k) ? native[k][0] : 'which_key#util#mismatch()',
-            \ target[k] ]
+              \ v]
       endif
 
     endif
 
   endfor
 
+  " TODO handle <C-I>, <Tab> more clearly
   if has_key(native, '<C-I>')
     if !has_key(target, '<Tab>')
       let target['<Tab>'] = native['<C-I>']

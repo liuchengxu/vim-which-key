@@ -1,3 +1,4 @@
+let s:TYPE = g:which_key#util#TYPE
 let s:displaynames = {
       \ ' ': 'SPC',
       \ '<C-H>': 'BS',
@@ -14,11 +15,11 @@ endfunction
 
 function! s:calc_layout(mappings) abort " {{{
   let layout = {}
-  let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == type([]) && v:val[1] == "which_key_ignore")')
+  let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == s:TYPE.list && v:val[1] == "which_key_ignore")')
   let layout.n_items = len(smap)
   let length = values(map(smap,
         \ 'strdisplaywidth(get(s:displaynames, toupper(v:key), v:key).'.
-        \ '(type(v:val) == type({}) ? v:val["name"] : v:val[1]))'))
+        \ '(type(v:val) == s:TYPE.dict ? v:val["name"] : v:val[1]))'))
 
   let maxlength = max(length) + g:which_key_hspace
   if g:which_key_vertical

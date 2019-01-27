@@ -12,7 +12,7 @@ function! s:open() abort
 
   if bufexists(s:bufnr)
     let qfbuf = &buftype ==# 'quickfix'
-    let splitcmd = g:which_key_vertical ? '1vs' : '1sp'
+    let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
     noautocmd execute 'keepjumps' position splitcmd
     let bnum = bufnr('%')
     noautocmd execute 'buffer' s:bufnr
@@ -53,8 +53,14 @@ function! which_key#window#fill(runtime) abort
 
   let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
   noautocmd execute resize layout.win_dim
+
   setlocal modifiable
   call setline(1, rows)
+  " Clear tailing old content
+  let [total, cur] = [line('$'), len(rows)]
+  if total > cur
+    execute cur+1.','.total 'd"_'
+  endif
   setlocal nomodifiable
 
   call which_key#wait_for_input()
