@@ -55,12 +55,8 @@ function! which_key#window#fill(runtime) abort
   noautocmd execute resize layout.win_dim
 
   setlocal modifiable
+  execute 'normal! gg"_'.line('$').'dd'
   call setline(1, rows)
-  " Clear tailing old content
-  let [total, cur] = [line('$'), len(rows)]
-  if total > cur
-    execute cur+1.','.total 'd"_'
-  endif
   setlocal nomodifiable
 
   call which_key#wait_for_input()
