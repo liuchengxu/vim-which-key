@@ -55,7 +55,9 @@ function! which_key#window#fill(runtime) abort
   noautocmd execute resize layout.win_dim
 
   setlocal modifiable
-  execute 'normal! gg"_'.line('$').'dd'
+  " Delete all lines in the buffer
+  " Use black hole register to avoid affecting the normal registers. :h quote_
+  silent 1,$delete _
   call setline(1, rows)
   setlocal nomodifiable
 
