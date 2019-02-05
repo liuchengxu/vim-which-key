@@ -12,7 +12,7 @@ function! s:open() abort
 
   if bufexists(s:bufnr)
     let qfbuf = &buftype ==# 'quickfix'
-    let splitcmd = g:which_key_vertical ? '1vs' : '1sp'
+    let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
     noautocmd execute 'keepjumps' position splitcmd
     let bnum = bufnr('%')
     noautocmd execute 'buffer' s:bufnr
@@ -49,12 +49,15 @@ function! which_key#window#fill(runtime) abort
 
   let s:name = get(runtime, 'name', '')
 
-  let layout = which_key#util#calc_layout(runtime)
-  let rows = which_key#util#create_rows(layout, runtime)
+  let [layout, rows] = which_key#view#prepare(runtime)
 
   let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
   noautocmd execute resize layout.win_dim
+
   setlocal modifiable
+  " Delete all lines in the buffer
+  " Use black hole register to avoid affecting the normal registers. :h quote_
+  silent 1,$delete _
   call setline(1, rows)
   setlocal nomodifiable
 

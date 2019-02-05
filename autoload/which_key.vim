@@ -33,19 +33,26 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   if getchar(1)
     while 1
-      let c = getchar()
+      try
+        let c = getchar()
+      catch /^Vim:Interrupt$/
+        return ''
+      endtry
+      " <Esc>, <C-[>: 27
+      if c == 27
+        return ''
+      endif
       let char = c == 9 ? '<Tab>' : nr2char(c)
       let s:which_key_trigger .= ' '.char
       let next_level = get(s:runtime, char)
-      if type(next_level) == s:TYPE.dict
+      let ty = type(next_level)
+      if ty == s:TYPE.dict
         let s:runtime = next_level
-      elseif type(next_level) == s:TYPE.list
+      elseif ty == s:TYPE.list
         call s:execute(next_level[0])
         return
       else
-        echohl ErrorMsg
-        echom s:which_key_trigger.' is undefined'
-        echohl None
+        call which_key#util#undefined(s:which_key_trigger)
         return
       endif
       if s:wait_with_timeout(g:which_key_timeout)
@@ -73,41 +80,38 @@ function! s:merge(target, native) " {{{
   let target = a:target
   let native = a:native
 
-  for k in keys(target)
+  for [k, v] in items(target)
 
-    if type(target[k]) == s:TYPE.dict && has_key(native, k)
+    if type(v) == s:TYPE.dict && has_key(native, k)
 
       if type(native[k]) == s:TYPE.dict
-        if has_key(target[k], 'name')
-          let native[k].name = target[k].name
+        if has_key(v, 'name')
+          let native[k].name = v.name
         endif
         call s:merge(target[k], native[k])
       elseif type(native[k]) == s:TYPE.list
-        " if g:which_key_flatten == 0 || type(target[k]) == s:TYPE.dict
-          " let target[k.'m'] = target[k]
-        " endif
         let target[k] = native[k]
-        " if has_key(native, k.'m') && type(native[k.'m']) == s:TYPE.dict
-          " call s:merge(target[k.'m'], native[k.'m'])
-        " endif
       endif
 
     " Support add a description to an existing map without dual definition
-    elseif type(target[k]) == s:TYPE.string && k != 'name'
+    elseif type(v) == s:TYPE.string && k != 'name'
 
       " <Tab> <C-I>
       if k == '<Tab>' && has_key(native, '<C-I>')
-        let target[k] = [native['<C-I>'][0], target[k]]
+        let target[k] = [
+              \ native['<C-I>'][0],
+              \ v]
       else
         let target[k] = [
               \ has_key(native, k) ? native[k][0] : 'which_key#util#mismatch()',
-            \ target[k] ]
+              \ v]
       endif
 
     endif
 
   endfor
 
+  " TODO handle <C-I>, <Tab> more clearly
   if has_key(native, '<C-I>')
     if !has_key(target, '<Tab>')
       let target['<Tab>'] = native['<C-I>']
@@ -199,9 +203,9 @@ function! which_key#wait_for_input() " {{{
 endfunction
 
 function! s:handle_input(input) " {{{
-  let type = type(a:input)
+  let ty = type(a:input)
 
-  if type ==? s:TYPE.dict
+  if ty ==? s:TYPE.dict
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
     return
@@ -209,13 +213,11 @@ function! s:handle_input(input) " {{{
 
   call which_key#window#close()
 
-  if type ==? s:TYPE.list
+  if ty ==? s:TYPE.list
     call s:execute(a:input[0])
   else
     redraw!
-    echohl ErrorMsg
-    echom s:which_key_trigger.' is undefined'
-    echohl None
+    call which_key#util#undefined(s:which_key_trigger)
   endif
 endfunction
 
@@ -239,6 +241,10 @@ function! s:execute(cmd) abort
       let Cmd = s:join('call', 'feedkeys("\'.Cmd.'")')
     elseif Cmd =~? '.(*)$' && match(Cmd, '\<call\>') == -1
       let Cmd = s:join('call', Cmd)
+    elseif exists(':'.Cmd) || Cmd =~? '^call feedkeys(.*)$'
+      let Cmd = Cmd
+    else
+      let Cmd = s:join('call', 'feedkeys("'.Cmd.'")')
     endif
     execute Cmd
   catch
