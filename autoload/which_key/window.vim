@@ -13,11 +13,10 @@ function! s:open() abort
   if bufexists(s:bufnr)
     let qfbuf = &buftype ==# 'quickfix'
     let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
-    noautocmd execute 'keepjumps' position splitcmd
-    let bnum = bufnr('%')
-    noautocmd execute 'buffer' s:bufnr
+    noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
     cmapclear <buffer>
     if qfbuf
+      let bnum = bufnr('%')
       noautocmd execute bnum.'bwipeout!'
     endif
   else
