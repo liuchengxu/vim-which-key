@@ -190,7 +190,11 @@ function! s:getchar() abort
 endfunction
 
 function! which_key#wait_for_input() " {{{
-  call s:prompt()
+  if exists('*nvim_open_win')
+    redraw
+  else
+    call s:prompt()
+  endif
 
   let char = s:getchar()
   if char ==# ''
@@ -250,6 +254,10 @@ function! s:execute(cmd) abort
   catch
     echom v:exception
   endtry
+endfunction
+
+function! which_key#trigger() abort
+  return get(s:, 'which_key_trigger', '')
 endfunction
 
 function! which_key#statusline() abort
