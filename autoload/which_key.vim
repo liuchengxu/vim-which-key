@@ -123,7 +123,6 @@ function! s:merge(target, native) " {{{
 endfunction
 
 function! s:prompt() abort
-  redraw
   echohl Keyword
   echo s:which_key_trigger.'- '
   echohl None
@@ -190,9 +189,10 @@ function! s:getchar() abort
 endfunction
 
 function! which_key#wait_for_input() " {{{
-  if exists('*nvim_open_win')
-    redraw
-  else
+  " redraw is needed!
+  redraw
+
+  if !exists('*nvim_open_win')
     call s:prompt()
   endif
 
