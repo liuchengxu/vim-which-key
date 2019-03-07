@@ -123,7 +123,6 @@ function! s:merge(target, native) " {{{
 endfunction
 
 function! s:prompt() abort
-  redraw
   echohl Keyword
   echo s:which_key_trigger.'- '
   echohl None
@@ -190,7 +189,14 @@ function! s:getchar() abort
 endfunction
 
 function! which_key#wait_for_input() " {{{
-  call s:prompt()
+  " redraw is needed!
+  redraw
+
+  " Append the prompt in the buffer at last when using floating wnidow,
+  " or else show it in the cmdline.
+  if !exists('*nvim_open_win')
+    call s:prompt()
+  endif
 
   let char = s:getchar()
   if char ==# ''
@@ -250,6 +256,10 @@ function! s:execute(cmd) abort
   catch
     echom v:exception
   endtry
+endfunction
+
+function! which_key#trigger() abort
+  return get(s:, 'which_key_trigger', '')
 endfunction
 
 function! which_key#statusline() abort

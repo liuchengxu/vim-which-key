@@ -3,11 +3,51 @@ let s:winnr = -1
 
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
-  call s:open()
+  call s:open_win()
   call which_key#window#fill(a:runtime)
 endfunction
 
-function! s:open() abort
+function! s:open_win() abort
+
+  if exists('*nvim_open_win')
+    call s:open_floating_win()
+  else
+    call s:split_or_new()
+  endif
+
+  setlocal filetype=which_key
+
+  let s:winnr = winnr()
+
+  " Hides/restores cursor at the start/end of the guide, works in vim
+  " Snippets from vim-game-code-break
+  augroup which_key_cursor
+    autocmd!
+    execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+    execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+  augroup END
+  setlocal t_ve=
+endfunction
+
+function! s:open_floating_win() abort
+  if !bufexists(s:bufnr)
+    let s:bufnr = nvim_create_buf(v:false, v:false)
+  endif
+  " TODO should handle the layout better
+  call nvim_open_win(
+        \ s:bufnr, v:true, &columns, 120,
+        \ {
+        \   'relative': 'editor',
+        \   'row': &lines - 14,
+        \   'col': 0
+        \ })
+
+  if exists('&winhighlight')
+    setlocal winhighlight=Normal:Pmenu
+  endif
+endfunction
+
+function! s:split_or_new() abort
   let position = g:which_key_position ==? 'topleft' ? 'topleft' : 'botright'
 
   if bufexists(s:bufnr)
@@ -28,19 +68,6 @@ function! s:open() abort
       autocmd WinLeave <buffer> call which_key#window#close()
     augroup END
   endif
-
-  setlocal filetype=which_key
-
-  let s:winnr = winnr()
-
-  " Hides/restores cursor at the start/end of the guide, works in vim
-  " Snippets from vim-game-code-break
-  augroup which_key_cursor
-    autocmd!
-    execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-    execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-  augroup END
-  setlocal t_ve=
 endfunction
 
 function! which_key#window#fill(runtime) abort
@@ -50,8 +77,20 @@ function! which_key#window#fill(runtime) abort
 
   let [layout, rows] = which_key#view#prepare(runtime)
 
-  let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-  noautocmd execute resize layout.win_dim
+  if exists('*nvim_open_win')
+    call nvim_win_config(
+          \ win_getid(s:winnr), &columns, layout.win_dim + 2,
+          \ {
+          \   'relative': 'editor',
+          \   'row': &lines - layout.win_dim - 4,
+          \   'col': 0
+          \ })
+    let prompt = which_key#trigger().'- '.which_key#window#name()
+    let rows += ['', prompt]
+  else
+    let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+    noautocmd execute resize layout.win_dim
+  endif
 
   setlocal modifiable
   " Delete all lines in the buffer
