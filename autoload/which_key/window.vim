@@ -33,6 +33,7 @@ function! s:open_floating_win() abort
   if !bufexists(s:bufnr)
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
+  " TODO should handle the layout better
   call nvim_open_win(
         \ s:bufnr, v:true, &columns, 120,
         \ {
@@ -84,12 +85,12 @@ function! which_key#window#fill(runtime) abort
           \   'row': &lines - layout.win_dim - 4,
           \   'col': 0
           \ })
+    let prompt = which_key#trigger().'- '.which_key#window#name()
+    let rows += ['', prompt]
   else
     let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
     noautocmd execute resize layout.win_dim
   endif
-  let prompt = which_key#trigger().'- '.which_key#window#name()
-  let rows += ['', prompt]
 
   setlocal modifiable
   " Delete all lines in the buffer

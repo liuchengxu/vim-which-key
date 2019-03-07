@@ -12,6 +12,7 @@ setlocal
   \ nocursorcolumn
   \ winfixwidth
   \ winfixheight
+  \ listchars=
   \ colorcolumn=
   \ nobuflisted
   \ buftype=nofile
