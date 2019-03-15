@@ -9,7 +9,7 @@ endfunction
 
 function! s:open_win() abort
 
-  if exists('*nvim_open_win')
+  if exists('*nvim_open_win') && get(g:, 'which_key_use_floating_win', 1)
     call s:open_floating_win()
   else
     call s:split_or_new()

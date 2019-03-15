@@ -204,7 +204,8 @@ Possible value: {0, 1}. By default it's 1.
 >
   let g:which_key_align_by_seperator = 1
 <
-
+                                                *g:which_key_use_floating_win*
+Use neovim's floating window instead of splitting a new one if avaliable.
 
                                                 *g:which_key_run_map_on_popup*
 Mappings change during a vim-session, e.g., changing the filetype or buffer.
