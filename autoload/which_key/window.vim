@@ -9,7 +9,7 @@ endfunction
 
 function! s:open_win() abort
 
-  if exists('*nvim_open_win') && get(g:, 'which_key_use_floating_win', 1)
+  if g:which_key_use_floating_win
     call s:open_floating_win()
   else
     call s:split_or_new()
@@ -50,7 +50,7 @@ endfunction
 function! s:split_or_new() abort
   let position = g:which_key_position ==? 'topleft' ? 'topleft' : 'botright'
 
-  if bufexists(s:bufnr)
+  if g:which_key_use_floating_win
     let qfbuf = &buftype ==# 'quickfix'
     let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
     noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
@@ -77,7 +77,7 @@ function! which_key#window#fill(runtime) abort
 
   let [layout, rows] = which_key#view#prepare(runtime)
 
-  if exists('*nvim_open_win')
+  if g:which_key_use_floating_win
     call nvim_win_config(
           \ win_getid(s:winnr), &columns, layout.win_dim + 2,
           \ {
