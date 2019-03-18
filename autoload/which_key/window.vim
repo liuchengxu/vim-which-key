@@ -35,11 +35,13 @@ function! s:open_floating_win() abort
   endif
   " TODO should handle the layout better
   call nvim_open_win(
-        \ s:bufnr, v:true, &columns, 120,
+        \ s:bufnr, v:true,
         \ {
         \   'relative': 'editor',
         \   'row': &lines - 14,
-        \   'col': 0
+        \   'col': 0,
+        \   'width': &columns,
+        \   'height': 120
         \ })
 
   if exists('&winhighlight')
@@ -78,12 +80,14 @@ function! which_key#window#fill(runtime) abort
   let [layout, rows] = which_key#view#prepare(runtime)
 
   if g:which_key_use_floating_win
-    call nvim_win_config(
-          \ win_getid(s:winnr), &columns, layout.win_dim + 2,
+    call nvim_win_set_config(
+          \ win_getid(s:winnr),
           \ {
           \   'relative': 'editor',
           \   'row': &lines - layout.win_dim - 4,
-          \   'col': 0
+          \   'col': 0,
+          \   'width': &columns,
+          \   'height': layout.win_dim + 2
           \ })
     let prompt = which_key#trigger().'- '.which_key#window#name()
     let rows += ['', prompt]
