@@ -31,8 +31,7 @@ then.
 ==============================================================================
 USAGE                                                    *vim-which-key-usage*
 
-Usage Let's say `SPC` is your leader key and you use it to trigger
-vim-which-key:
+Let's say `SPC` is your leader key and you use it to trigger vim-which-key:
 >
   nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 <
@@ -142,72 +141,89 @@ It is possible to call the guide for keys other than `leader`:
 CONFIGURATION                                           *vim-which-key-config*
 
                                                              *g:which_key_sep*
+Type: |String|
+Default: `'→'`
+
 Set the separator used between keys and descriptions. Change this setting to
 an ASCII character if your font does not show the default arrow.
 >
   let g:which_key_sep = '→'
 <
-
                                                           *g:which_key_hspace*
-Set the minimum horizontal space between the displayed colomns.
+Type: |Number|
+Default: `5`
 
-Possible value: {Number}. By default it's 5.
+Set the minimum horizontal space between the displayed colomns.
 >
   let g:which_key_hspace = 5
 <
 
                                                          *g:which_key_flatten*
-Try to flatten out the keymappings if necessary.
+Type: |Number|
+Default: `1`
 
-Possible value: {0, 1}. By default it's 1.
+Try to flatten out the keymappings if necessary. Possible value: `{0, 1}` .
 >
   let g:which_key_flatten = 1
 <
-
                                                         *g:which_key_max_size*
-Set the maximum height/width of the guide window. Set to 0 for unlimited size.
+Type: |Number|
+Default: `0`
 
-Possible value: {Number}. By default it's 0.
+Set the maximum height/width of the guide window. Set to 0 for unlimited size.
 >
   let g:which_key_max_size = 0
 <
 
                                                         *g:which_key_vertical*
-If set to a value other than 0, the guide buffer will pop up in vertical split
-window.
+Type: |Number|
+Default: `0`
 
-Possible value: {0, 1}. By default it's 0.
+If set to a value other than 0, the guide buffer will pop up in vertical split
+window. Possible value: {0, 1}.
 >
   let g:which_key_vertical = 0
 <
 
                                                         *g:which_key_position*
-Set the direction from witch the guide-buffer should pop up.
+Type: |String|
+Default: `botright`
 
-Possible value: 'botright', 'topleft'. By default it's 'botright'.
+Set the direction from witch the guide-buffer should pop up. Possible value:
+'botright', 'topleft'.
 >
   let g:which_key_position = 'botright'
 <
-
                                                  *g:which_key_sort_horizontal*
-If set to a value other than 0, the entries will be sorted horizontal.
+Type: |Number|
+Default: `0`
 
-Possible value: {0, 1}. By default it's 0.
+If set to a value other than 0, the entries will be sorted horizontal.
+Possible value: `{0, 1}` .
 >
   let g:which_key_sort_horizontal = 0
 <
                                               *g:which_key_align_by_seperator*
-If set to a value other than 1, the entries of each column will be align by
-the initial char instead of the seperator.
+Type: |Number|
+Default: `0`
 
-Possible value: {0, 1}. By default it's 1.
+If set to a value other than 1, the entries of each column will be align by
+the initial char instead of the seperator. Possible value: `{0, 1}` .
 >
   let g:which_key_align_by_seperator = 1
 <
                                                 *g:which_key_use_floating_win*
-Use neovim's floating window instead of splitting a new one if avaliable.
+Type: |Number|
+Default: `0`
 
+Use neovim's floating window instead of splitting a new one if avaliable.
+>
+  let g:which_key_use_floating_win = 1
+<
                                                 *g:which_key_run_map_on_popup*
+Type: |Number|
+Default: `0`
+
 Mappings change during a vim-session, e.g., changing the filetype or buffer.
 Thus, when disabling this option the displayed mappings might get outdated.
 The delay when opening the guide is negligible.
@@ -219,42 +235,52 @@ Note: It is not recommended to disable this option. If set to 0,
 |vim-leader-guide| will not parse mappings when opening a guide buffer. Cached
 values will be used instead.
 
-Possible value: {0, 1}. By default it's 1.
+Possible value: `{0, 1}` .
 >
   let g:which_key_run_map_on_popup = 1
 <
-
                                               *g:which_key_default_group_name*
+Type: |String|
+Default: `''`
+
 Allows to set a default group name. This name is shown as group description
 when the configuration dictionary has no corrosponding entry.
-
-Possible value: {String}. By default it's emprty.
 >
   let g:which_key_default_group_name = ''
 <
-
                                                         *g:WhichKeyFormatFunc*
+
+Type: |Funcref|
+Default: `function('which_key#util#format')`
+
 WhichKeyFormatFunc is a Funcref called on every display item, which could be
 used to hide all trailing <CR> as well as all leading <Plug> substring in the
 guide buffer.
-
-Possible value: Funcref. By default it's `function('which_key#util#format')`.
 >
   let g:WhichKeyFormatFunc = function('which_key#util#format')
 <
 
                                                         *g:which_key_timeout*
-Similar to `timeoutlen`, but for vim-which-key particularly.
+Type: |Number|
+Default: `&timeoutlen`
 
-Possible value: {Number}. By default it's same with option `timeoutlen`.
+Similar to `timeoutlen`, but for vim-which-key particularly. By default it's
+same with option `timeoutlen`.
 >
   let g:which_key_timeout = 300
 <
-
+                                                          *'which_key_ignore'*
+If you wish to hide a mapping from the menu set its description to
+`'which_key_ignore'`:
+>
+    nnoremap <leader>1 :1wincmd w<CR>
+    let g:which_key_map.1 = 'which_key_ignore'
+>
 ==============================================================================
 COMMANDS                                              *vim-which-key-commands*
 
 :WhichKey[!]                                                       *:WhichKey*
+
   Open the guide window for the given prefix. This command, together with
   |:WhichKeyVisual| is the primary way of interacting with the plugin.
 
@@ -271,12 +297,14 @@ COMMANDS                                              *vim-which-key-commands*
 <
 
 :[range]WhichKeyVisual[!]                                    *:WhichKeyVisual*
+
   Same as |:WhichKey|, but opening the menu in visual mode.
 
 ==============================================================================
 FUNCTIONS                                            *vim-which-key-functions*
 
 which_key#register({prefix}, {dict})                    *which_key#register()*
+
   Provide the guide with a {prefix} and its description dictionary. This
   dictionary {dict} is used to provide convenient names for mappings to
   display in the guide popup. Additionally it is used to provide group names.
@@ -293,6 +321,7 @@ which_key#register({prefix}, {dict})                    *which_key#register()*
 <
 
 which_key#start({vis}, {bang}, {prefix})                   *which_key#start()*
+
   This is the implementation for |:WhichKey| and |:WhichKey!|.
 
 which_key#parse_mappings()                        *which_key#parse_mappings()*
@@ -300,6 +329,7 @@ which_key#parse_mappings()                        *which_key#parse_mappings()*
   Update the cache manually by calling this function.
 
 which_key#util#format({mapping})                     *which_key#util#format()*
+
   This function is called on all for every display string in the guide buffer.
   By default |vim-which-key| will hide all trailing <CR> as well as all
   leading <C-U> and `:`.
