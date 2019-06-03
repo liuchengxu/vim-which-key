@@ -269,6 +269,13 @@ same with option `timeoutlen`.
 >
   let g:which_key_timeout = 300
 <
+                                            *g:which_key_ignore_invalid_key*
+Type: |Number|
+Default: `1`
+
+Ignore the invalid key and let you continue to input the valid ones. Otherwise
+an error message will be popuped and abort the guide buffer.
+
                                                           *'which_key_ignore'*
 If you wish to hide a mapping from the menu set its description to
 `'which_key_ignore'`:

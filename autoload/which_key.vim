@@ -231,7 +231,7 @@ function! s:handle_input(input) " {{{
     call which_key#window#close()
     call s:execute(a:input[0])
   else
-    if get(g:, 'which_key_ignore_invalid_key', 1)
+    if g:which_key_ignore_invalid_key
       call which_key#wait_for_input()
     else
       call which_key#window#close()
