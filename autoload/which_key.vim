@@ -227,13 +227,17 @@ function! s:handle_input(input) " {{{
     return
   endif
 
-  call which_key#window#close()
-
   if ty ==? s:TYPE.list
+    call which_key#window#close()
     call s:execute(a:input[0])
   else
-    redraw!
-    call which_key#util#undefined(s:which_key_trigger)
+    if get(g:, 'which_key_ignore_invalid_key', 1)
+      call which_key#wait_for_input()
+    else
+      call which_key#window#close()
+      redraw!
+      call which_key#util#undefined(s:which_key_trigger)
+    endif
   endif
 endfunction
 
