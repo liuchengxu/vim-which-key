@@ -62,6 +62,7 @@ function! which_key#start(vis, bang, prefix) " {{{
     endwhile
   endif
 
+  let s:last_runtime = s:runtime
   call which_key#window#open(s:runtime)
 endfunction
 
@@ -172,6 +173,13 @@ function! s:getchar() abort
     return ''
   endif
 
+  if c == "\<BS>"
+    let s:runtime = s:last_runtime
+    let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
+    call which_key#window#fill(s:last_runtime)
+    return ''
+  endif
+
   " <Tab>, <C-I> = 9
   let input .= c == 9 ? '<Tab>' : nr2char(c)
 
@@ -213,6 +221,7 @@ function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
+    let s:last_runtime = s:runtime
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
     return
