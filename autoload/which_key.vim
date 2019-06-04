@@ -226,7 +226,7 @@ function! which_key#wait_for_input() " {{{
     return
   endif
 
-  let s:which_key_trigger .= ' '. (char ==# ' ' ? 'SPC' : char)
+  let s:cur_char = char
 
   call s:handle_input(get(s:runtime, char))
 endfunction
@@ -235,6 +235,7 @@ function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
+    let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? 'SPC' : s:cur_char)
     call add(s:last_runtime_stack, copy(s:runtime))
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
