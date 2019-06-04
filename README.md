@@ -53,9 +53,10 @@ Plug 'liuchengxu/vim-which-key'
 
 " On-demand lazy load
 Plug 'liuchengxu/vim-which-key', { 'on': ['WhichKey', 'WhichKey!'] }
-" To register the descriptions when using the on-demand load feature, use the autocmd hook to call which#register(),
-" e.g., register for the Space key(see more configuration details in the following sections):
-" autocmd! User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+
+" To register the descriptions when using the on-demand load feature,
+" use the autocmd hook to call which#register(), e.g., register for the Space key:
+" autocmd! User vim-which-key call which#register('<Space>', 'g:which_key_map')
 ```
 
 For other plugin managers please refer to their document for more details.
@@ -152,6 +153,7 @@ let g:which_key_map['w'] = {
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/spc-w.png"></p>
 
 If you wish to hide a mapping from the menu set it's description to `'which_key_ignore'`. Useful for instance, to hide a list of <leader>[1-9] window swapping mappings. For example the below mapping will not be shown in the menu.
+
 ```vim
 nnoremap <leader>1 :1wincmd w<CR>
 let g:which_key_map.1 = 'which_key_ignore'
@@ -159,7 +161,18 @@ let g:which_key_map.1 = 'which_key_ignore'
 
 #### Example
 
-Refer to [space-vim](https://github.com/liuchengxu/space-vim/blob/master/core/autoload/spacevim/map/leader.vim) for more detailed example.
+You can configure a Dict for each prefix so that the display is more readable.
+
+To make the guide pop up **Register the description dictionary for the prefix first**. Assuming `Space` is your leader key and the Dict for confiuring `Space` is `g:which_key_map`:
+
+```vim
+call which_key#register('<Space>', "g:which_key_map")
+
+nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
+vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
+```
+
+The next step is to add items to `g:which_key_map`:
 
 ```vim
 " Define prefix dictionary
@@ -208,28 +221,19 @@ let g:which_key_map.b = {
       \ }
 
 let g:which_key_map.l = {
-      \ 'name' : '+lsp'                                            ,
-      \ 'f' : ['LanguageClient#textDocument_formatting()'     , 'formatting']       ,
-      \ 'h' : ['LanguageClient#textDocument_hover()'          , 'hover']            ,
-      \ 'r' : ['LanguageClient#textDocument_references()'     , 'references']       ,
-      \ 'R' : ['LanguageClient#textDocument_rename()'         , 'rename']           ,
-      \ 's' : ['LanguageClient#textDocument_documentSymbol()' , 'document-symbol']  ,
-      \ 'S' : ['LanguageClient#workspace_symbol()'            , 'workspace-symbol'] ,
+      \ 'name' : '+lsp',
+      \ 'f' : ['spacevim#lang#util#Format()'          , 'formatting']       ,
+      \ 'r' : ['spacevim#lang#util#FindReferences()'  , 'references']       ,
+      \ 'R' : ['spacevim#lang#util#Rename()'          , 'rename']           ,
+      \ 's' : ['spacevim#lang#util#DocumentSymbol()'  , 'document-symbol']  ,
+      \ 'S' : ['spacevim#lang#util#WorkspaceSymbol()' , 'workspace-symbol'] ,
       \ 'g' : {
         \ 'name': '+goto',
-        \ 'd' : ['LanguageClient#textDocument_definition()'     , 'definition']       ,
-        \ 't' : ['LanguageClient#textDocument_typeDefinition()' , 'type-definition']  ,
-        \ 'i' : ['LanguageClient#textDocument_implementation()'  , 'implementation']  ,
+        \ 'd' : ['spacevim#lang#util#Definition()'     , 'definition']      ,
+        \ 't' : ['spacevim#lang#util#TypeDefinition()' , 'type-definition'] ,
+        \ 'i' : ['spacevim#lang#util#Implementation()' , 'implementation']  ,
         \ },
       \ }
-```
-
-To make the guide pop up **Register the description dictionary for the prefix first** (assuming `Space` is your leader key):
-
-```vim
-call which_key#register('<Space>', "g:which_key_map")
-nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
-vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
 ```
 
 The guide will be up to date at all times. Native vim mappings will always take precedence over dictionary-only mappings.
@@ -240,6 +244,8 @@ It is possible to call the guide for keys other than `leader`:
 nnoremap <localleader> :<c-u>WhichKey  ','<CR>
 vnoremap <localleader> :<c-u>WhichKeyVisual  ','<CR>
 ```
+
+- Refer to [space-vim](https://github.com/liuchengxu/space-vim/blob/master/core/autoload/spacevim/map/leader.vim) for more detailed example.
 
 #### Hide statusline
 
