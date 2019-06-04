@@ -62,7 +62,7 @@ function! which_key#start(vis, bang, prefix) " {{{
     endwhile
   endif
 
-  let s:last_runtime = s:runtime
+  let s:last_runtime_stack = [copy(s:runtime)]
   call which_key#window#open(s:runtime)
 endfunction
 
@@ -173,10 +173,24 @@ function! s:getchar() abort
     return ''
   endif
 
+  " Allow <BS> to go back to the upper level.
   if c == "\<BS>"
-    let s:runtime = s:last_runtime
-    let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
-    call which_key#window#fill(s:last_runtime)
+    " Top level
+    if empty(s:last_runtime_stack)
+      call which_key#window#fill(s:runtime)
+      return ''
+    endif
+
+    let last_runtime = s:last_runtime_stack[-1]
+    let s:runtime = last_runtime
+
+    if len(s:last_runtime_stack) > 1
+      let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
+    endif
+
+    unlet s:last_runtime_stack[-1]
+
+    call which_key#window#fill(last_runtime)
     return ''
   endif
 
@@ -221,7 +235,7 @@ function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
-    let s:last_runtime = s:runtime
+    call add(s:last_runtime_stack, copy(s:runtime))
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
     return
