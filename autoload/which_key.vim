@@ -62,6 +62,7 @@ function! which_key#start(vis, bang, prefix) " {{{
     endwhile
   endif
 
+  let s:last_runtime_stack = [copy(s:runtime)]
   call which_key#window#open(s:runtime)
 endfunction
 
@@ -172,6 +173,27 @@ function! s:getchar() abort
     return ''
   endif
 
+  " Allow <BS> to go back to the upper level.
+  if c == "\<BS>"
+    " Top level
+    if empty(s:last_runtime_stack)
+      call which_key#window#fill(s:runtime)
+      return ''
+    endif
+
+    let last_runtime = s:last_runtime_stack[-1]
+    let s:runtime = last_runtime
+
+    if len(s:last_runtime_stack) > 1
+      let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
+    endif
+
+    unlet s:last_runtime_stack[-1]
+
+    call which_key#window#fill(last_runtime)
+    return ''
+  endif
+
   " <Tab>, <C-I> = 9
   let input .= c == 9 ? '<Tab>' : nr2char(c)
 
@@ -204,7 +226,7 @@ function! which_key#wait_for_input() " {{{
     return
   endif
 
-  let s:which_key_trigger .= ' '. (char ==# ' ' ? 'SPC' : char)
+  let s:cur_char = char
 
   call s:handle_input(get(s:runtime, char))
 endfunction
@@ -213,18 +235,24 @@ function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
+    let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? 'SPC' : s:cur_char)
+    call add(s:last_runtime_stack, copy(s:runtime))
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
     return
   endif
 
-  call which_key#window#close()
-
   if ty ==? s:TYPE.list
+    call which_key#window#close()
     call s:execute(a:input[0])
   else
-    redraw!
-    call which_key#util#undefined(s:which_key_trigger)
+    if g:which_key_ignore_invalid_key
+      call which_key#wait_for_input()
+    else
+      call which_key#window#close()
+      redraw!
+      call which_key#util#undefined(s:which_key_trigger)
+    endif
   endif
 endfunction
 
