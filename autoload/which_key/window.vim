@@ -44,8 +44,11 @@ function! s:open_floating_win() abort
         \   'height': 120
         \ })
 
+  if !hlexists('WhichKeyFloating')
+    hi default link WhichKeyFloating Pmenu
+  endif
   if exists('&winhighlight')
-    setlocal winhighlight=Normal:Pmenu
+    setlocal winhighlight=Normal:WhichKeyFloating
   endif
 endfunction
 
