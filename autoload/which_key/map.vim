@@ -34,6 +34,12 @@ function! which_key#map#parse(key, dict, visual) " {{{
 
     let mapd.rhs = substitute(mapd.rhs, "<SID>", "<SNR>".mapd['sid']."_", "g")
 
+    " eval the expression as the final {rhs}
+    " Ref #60
+    if mapd.expr
+      let mapd.rhs = eval(mapd.rhs)
+    endif
+
     if mapd.lhs != '' && mapd.display !~# 'WhichKey.*'
       if (visual && match(mapd.mode, "[vx ]") >= 0) ||
             \ (!visual && match(mapd.mode, "[vx]") == -1)
