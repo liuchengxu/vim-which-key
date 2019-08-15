@@ -55,12 +55,31 @@ function! s:create_rows(layout, mappings) abort
   let col = 0
   let smap = sort(filter(keys(mappings), 'v:val !=# "name"'),'1')
 
+  if get(g:, 'which_key_align_by_seperator', 1)
+    let key_max_len = 0
+    for k in smap
+      let key = get(s:displaynames, toupper(k), k)
+      let width = strdisplaywidth(key)
+      if width > key_max_len
+        let key_max_len = width
+      endif
+    endfor
+  endif
+
   for k in smap
     let key = get(s:displaynames, toupper(k), k)
     let desc = type(mappings[k]) == type({}) ? mappings[k].name : mappings[k][1]
     if desc == 'which_key_ignore'
       continue
     endif
+
+    if get(g:, 'which_key_align_by_seperator', 1)
+      let width = strdisplaywidth(key)
+      if key_max_len > width
+        let key = repeat(' ', key_max_len - width).key
+      endif
+    endif
+
     let item = s:combine(key, desc)
 
     let crow = get(rows, row, [])
@@ -91,28 +110,6 @@ function! s:create_rows(layout, mappings) abort
     endif
     silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
   endfor
-
-  if get(g:, 'which_key_align_by_seperator', 1)
-    for i in range(0, col-1)
-      let cur_col = []
-      for j in range(0, n_rows)
-        if i < len(rows[j])
-          call add(cur_col, rows[j][i])
-        endif
-      endfor
-      let cur_col_keys = map(cur_col, 'strdisplaywidth(split(v:val)[0])')
-      let [max_key_len, min_key_len] = [max(cur_col_keys), min(cur_col_keys)]
-      if max_key_len != min_key_len
-        for j in range(0, n_rows)
-          if i < len(rows[j])
-            let key = split(rows[j][i])[0]
-            let len = strdisplaywidth(key)
-            let rows[j][i] = repeat(' ', max_key_len-len).rows[j][i][0:(l.col_width + 1 - (max_key_len -len))]
-          endif
-        endfor
-      endif
-    endfor
-  endif
 
   call map(rows, 'join(v:val, "")')
 
