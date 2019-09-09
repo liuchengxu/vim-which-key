@@ -163,7 +163,7 @@ let g:which_key_map.1 = 'which_key_ignore'
 
 You can configure a Dict for each prefix so that the display is more readable.
 
-To make the guide pop up **Register the description dictionary for the prefix first**. Assuming `Space` is your leader key and the Dict for confiuring `Space` is `g:which_key_map`:
+To make the guide pop up **Register the description dictionary for the prefix first**. Assuming `Space` is your leader key and the Dict for configuring `Space` is `g:which_key_map`:
 
 ```vim
 call which_key#register('<Space>', "g:which_key_map")
