@@ -217,7 +217,7 @@ function! which_key#wait_for_input() " {{{
 
   " Append the prompt in the buffer at last when using floating wnidow,
   " or else show it in the cmdline.
-  if !g:which_key_use_floating_win
+  if !g:which_key_use_floating_win && !exists('*popup_create')
     call s:prompt()
   endif
 
