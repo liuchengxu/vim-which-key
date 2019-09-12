@@ -83,10 +83,15 @@ function! s:split_or_new() abort
   endif
 endfunction
 
-function! s:show_popup(rows) abort
+function! s:append_prompt(rows) abort
   let rows = a:rows
   let prompt = which_key#trigger().'- '.which_key#window#name()
   let rows += ['', prompt]
+  return rows
+endfunction
+
+function! s:show_popup(rows) abort
+  let rows = s:append_prompt(a:rows)
   let col = &signcolumn ==# 'yes' ? 2 : 1
   let col += &number ? &numberwidth : 0
   call popup_move(s:popup_id, {
@@ -98,22 +103,17 @@ function! s:show_popup(rows) abort
 endfunction
 
 function! s:show_floating_win(rows, layout) abort
-  let rows = a:rows
-
+  let rows = s:append_prompt(a:rows)
+  call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
   call nvim_win_set_config(
         \ win_getid(s:winnr),
         \ {
         \   'relative': 'editor',
-        \   'row': &lines - a:layout.win_dim - 4,
+        \   'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
         \   'col': 0,
         \   'width': &columns,
         \   'height': a:layout.win_dim + 2
         \ })
-
-  let prompt = which_key#trigger().'- '.which_key#window#name()
-  let rows += ['', prompt]
-
-  call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
 endfunction
 
 function! which_key#window#fill(runtime) abort
