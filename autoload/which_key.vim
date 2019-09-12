@@ -215,9 +215,9 @@ function! which_key#wait_for_input() " {{{
   " redraw is needed!
   redraw
 
-  " Append the prompt in the buffer at last when using floating wnidow,
-  " or else show it in the cmdline.
-  if !g:which_key_use_floating_win && !exists('*popup_create')
+  " Append the prompt in the buffer at last when using floating or
+  " popup wnidow, otherwise show it in the cmdline.
+  if !g:which_key_use_floating_win
     call s:prompt()
   endif
 
