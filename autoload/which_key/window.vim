@@ -9,7 +9,7 @@ function! which_key#window#open(runtime) abort
       let s:popup_id = popup_create([], {})
       call popup_hide(s:popup_id)
       call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-      " call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
     endif
   else
     if g:which_key_use_floating_win

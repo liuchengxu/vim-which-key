@@ -19,7 +19,7 @@ function! s:calc_layout(mappings) abort " {{{
   let layout.n_items = len(smap)
   let length = values(map(smap,
         \ 'strdisplaywidth(get(s:displaynames, toupper(v:key), v:key).'.
-        \ '(type(v:val) == s:TYPE.dict ? v:val["name"] : v:val[1]))'))
+        \ '(type(v:val) == s:TYPE.dict ? get(v:val, "name", "") : v:val[1]))'))
 
   let maxlength = max(length) + g:which_key_hspace
   if g:which_key_vertical
@@ -68,7 +68,7 @@ function! s:create_rows(layout, mappings) abort
 
   for k in smap
     let key = get(s:displaynames, toupper(k), k)
-    let desc = type(mappings[k]) == type({}) ? mappings[k].name : mappings[k][1]
+    let desc = type(mappings[k]) == s:TYPE.dict ? get(mappings[k], "name", "") : mappings[k][1]
     if desc == 'which_key_ignore'
       continue
     endif
@@ -108,7 +108,8 @@ function! s:create_rows(layout, mappings) abort
         let col += 1
       endif
     endif
-    silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
+    " This would cause bugs when using vim popup
+    "silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
   endfor
 
   call map(rows, 'join(v:val, "")')

@@ -20,7 +20,7 @@ let g:which_key_run_map_on_popup = get(g:, 'which_key_run_map_on_popup', 1)
 let g:which_key_align_by_seperator = get(g:, 'which_key_align_by_seperator', 1)
 let g:which_key_ignore_invalid_key = get(g:, 'which_key_ignore_invalid_key', 1)
 let g:which_key_default_group_name = get(g:, 'which_key_default_group_name', '+prefix')
-let g:which_key_use_floating_win = exists('*nvim_open_win') && get(g:, 'which_key_use_floating_win', 1)
+let g:which_key_use_floating_win = (exists('*nvim_open_win') || exists('*popup_create')) && get(g:, 'which_key_use_floating_win', 1)
 let g:WhichKeyFormatFunc = get(g:, 'WhichKeyFormatFunc', function('which_key#util#format'))
 
 command! -bang -nargs=1 WhichKey call which_key#start(0, <bang>0, <args>)
