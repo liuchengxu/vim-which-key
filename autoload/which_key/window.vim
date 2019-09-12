@@ -1,15 +1,17 @@
 let s:bufnr = -1
 let s:winnr = -1
 
+let s:use_popup = exists('*popup_create') && g:which_key_use_floating_win
+
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
 
-  if exists('*popup_create')
+  if s:use_popup
     if !exists('s:popup_id')
       let s:popup_id = popup_create([], {})
       call popup_hide(s:popup_id)
-      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
       call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
     endif
   else
     if g:which_key_use_floating_win
@@ -20,17 +22,17 @@ function! which_key#window#open(runtime) abort
 
     setlocal filetype=which_key
 
+    " Hides/restores cursor at the start/end of the guide, works in vim
+    " Snippets from vim-game-code-break
+    augroup which_key_cursor
+      autocmd!
+      execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+      execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+    augroup END
+    setlocal t_ve=
+
     let s:winnr = winnr()
   endif
-
-  " Hides/restores cursor at the start/end of the guide, works in vim
-  " Snippets from vim-game-code-break
-  " augroup which_key_cursor
-    " autocmd!
-    " execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-    " execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-  " augroup END
-  " setlocal t_ve=
 
   call which_key#window#fill(a:runtime)
 endfunction
@@ -121,7 +123,7 @@ function! which_key#window#fill(runtime) abort
 
   let [layout, rows] = which_key#view#prepare(runtime)
 
-  if exists('*popup_create')
+  if s:use_popup
     call s:show_popup(rows)
   else
     if g:which_key_use_floating_win
