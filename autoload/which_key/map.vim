@@ -92,15 +92,18 @@ function! s:add_map_to_dict(map, level, dict) " {{{
 
   else
 
-    if !has_key(a:dict, a:map.lhs[a:level])
-      let a:dict[a:map.lhs[a:level]] = [cmd, a:map.display]
+    let lhs_at_level = a:map.lhs[a:level]
+
+    if !has_key(a:dict, lhs_at_level)
+      let a:dict[lhs_at_level] = [cmd, a:map.display]
     " spot is taken already, flatten existing submaps
-    elseif type(a:dict[a:map.lhs[a:level]]) == s:TYPE.dict && g:which_key_flatten
-      let childmap = s:flatten(a:dict[a:map.lhs[a:level]], a:map.lhs[a:level])
+    elseif type(a:dict[lhs_at_level]) == s:TYPE.dict
+          \ && g:which_key_flatten
+      let childmap = s:flatten(a:dict[lhs_at_level], lhs_at_level)
       for it in keys(childmap)
         let a:dict[it] = childmap[it]
       endfor
-      let a:dict[a:map.lhs[a:level]] = [cmd, a:map.display]
+      let a:dict[lhs_at_level] = [cmd, a:map.display]
     endif
 
   endif
