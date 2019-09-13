@@ -216,7 +216,8 @@ the initial char instead of the seperator. Possible value: `{0, 1}` .
 Type: |Number|
 Default: `0`
 
-Use neovim's floating window instead of splitting a new one if avaliable.
+Use neovim's floating or vim's popup window if avaliable. The adavantage is to
+put your current window layout untouched compared to splitting a new window.
 >
   let g:which_key_use_floating_win = 1
 <
