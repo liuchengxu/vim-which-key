@@ -39,8 +39,7 @@ function! which_key#start(vis, bang, prefix) " {{{
       catch /^Vim:Interrupt$/
         return ''
       endtry
-      " <Esc>, <C-[>: 27
-      if c == 27
+      if s:is_exit_code(c)
         return ''
       endif
       let char = c == 9 ? '<Tab>' : nr2char(c)
@@ -64,6 +63,39 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   let s:last_runtime_stack = [copy(s:runtime)]
   call which_key#window#open(s:runtime)
+endfunction
+
+" Argument: number
+function! s:is_exit_code(raw_char) abort
+  if !exists('s:exit_code')
+    if exists('g:which_key_exit')
+      let ty = type(g:which_key_exit)
+      if ty == s:TYPE.number || ty == s:TYPE.string
+        let s:exit_code = [g:which_key_exit]
+      elseif ty = s:TYPE.list
+        let s:exit_code = g:which_key_exit
+      else
+        echohl ErrorMsg
+        echom '[which-key] '.a:raw_char.' is invalid for option g:which_key_exit'
+        echohl None
+        return 1
+      endif
+    else
+      " <Esc>, <C-[>: 27
+      let s:exit_code = [27]
+    endif
+  endif
+
+  for e in s:exit_code
+    let ty = type(e)
+    if ty == s:TYPE.number && e == a:raw_char
+      return 1
+    elseif ty == s:TYPE.string && e == nr2char(a:raw_char)
+      return 1
+    endif
+  endfor
+
+  return 0
 endfunction
 
 function! s:create_runtime(key)
@@ -166,8 +198,7 @@ function! s:getchar() abort
     return ''
   endtry
 
-  " <Esc>, <C-[>: 27
-  if c == 27
+  if s:is_exit_code(c)
     call which_key#window#close()
     redraw!
     return ''
