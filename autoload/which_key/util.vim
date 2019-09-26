@@ -1,9 +1,10 @@
 scriptencoding utf-8
 
 let g:which_key#util#TYPE = {
-      \ 'string':  type(''),
       \ 'list':    type([]),
       \ 'dict':    type({}),
+      \ 'number':  type(0),
+      \ 'string':  type(''),
       \ 'funcref': type(function('call'))
       \ }
 
@@ -65,7 +66,7 @@ endfunction
 
 function! which_key#util#undefined(key) abort
   echohl ErrorMsg
-  echom a:key.' is undefined'
+  echom '[which-key] '.a:key.' is undefined'
   echohl None
 endfunction
 

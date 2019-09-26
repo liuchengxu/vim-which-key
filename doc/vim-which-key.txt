@@ -270,6 +270,15 @@ same with option `timeoutlen`.
 >
   let g:which_key_timeout = 300
 <
+                                                           *g:which_key_exit*
+
+Type: |Number| | |String| | |List|
+Default: `["\<C-[>", "\<Esc>"]`
+
+Exit which-key when the key is triggered. For example, use `<C-G>` to exit: >
+
+    let g:which_key_exit = "\<C-G>"
+>
                                             *g:which_key_ignore_invalid_key*
 Type: |Number|
 Default: `1`
@@ -283,7 +292,7 @@ If you wish to hide a mapping from the menu set its description to
 >
     nnoremap <leader>1 :1wincmd w<CR>
     let g:which_key_map.1 = 'which_key_ignore'
->
+
 ==============================================================================
 COMMANDS                                              *vim-which-key-commands*
 
