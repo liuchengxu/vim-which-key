@@ -72,7 +72,7 @@ function! s:is_exit_code(raw_char) abort
       let ty = type(g:which_key_exit)
       if ty == s:TYPE.number || ty == s:TYPE.string
         let s:exit_code = [g:which_key_exit]
-      elseif ty = s:TYPE.list
+      elseif ty == s:TYPE.list
         let s:exit_code = g:which_key_exit
       else
         echohl ErrorMsg
