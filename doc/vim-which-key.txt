@@ -292,7 +292,16 @@ If you wish to hide a mapping from the menu set its description to
 >
     nnoremap <leader>1 :1wincmd w<CR>
     let g:which_key_map.1 = 'which_key_ignore'
+>
+                                            *g:which_key_display_names*
+Type: |Dict|
+Default: `{ ' ': 'SPC', '<C-H>': 'BS', '<C-I>': 'TAB', '<TAB>': 'TAB', }`
 
+Override the default symbols used for mappings. Dict keys should be all
+uppercase.
+>
+    let g:which_key_display_names = {'<CR>': '↵', '<TAB>': '⇆'}
+<
 ==============================================================================
 COMMANDS                                              *vim-which-key-commands*
 
