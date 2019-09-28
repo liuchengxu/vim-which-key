@@ -88,14 +88,7 @@ function! s:m_char(char)
   return [m_char, m_char_code]
 endfunction
 
-function! s:to_list(str)
-  return split(a:str, '\zs')
-endfunction
-
-
-let s:chars = s:to_list('AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789')
-      \ + s:to_list('`~!@#$%^&*()-_=+')+ s:to_list(' 	') + s:to_list('[]{};:''"\|,./<>?')
-
+let s:chars = map(range(32, 126), 'nr2char(v:val)')
 let g:which_key#util#special_keys = {"\<C-Space>": "<C-Space>"}
 for c in s:chars
   let [key, code] = s:m_char(c)
