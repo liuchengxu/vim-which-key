@@ -225,23 +225,11 @@ function! s:getchar() abort
     return ''
   endif
 
-  if type(c) == s:TYPE.number
-    " <Tab>, <C-I> = 9
-    let input .= c == 9 ? '<Tab>' : nr2char(c)
-  else
-    " Special characters
-    let input .= g:which_key#util#special_keys[c]
-  endif
-
+  let input .= which_key#util#parse_getchar(c)
   if s:has_children(input)
     while 1
       if !s:wait_with_timeout(g:which_key_timeout)
-        let c = getchar()
-        if type(c) == s:TYPE.number
-          let input .= c == 9 ? '<Tab>' : nr2char(c)
-        else
-          let input .= g:which_key#util#special_keys[c]
-        endif
+        let input .= which_key#util#parse_getchar(getchar())
       else
         break
       endif

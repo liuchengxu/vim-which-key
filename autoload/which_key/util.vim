@@ -101,3 +101,13 @@ for c in s:chars
   let [key, code] = s:m_char(c)
   let g:which_key#util#special_keys[code] = key
 endfor
+
+function! which_key#util#parse_getchar(input)
+  if type(a:input) == g:which_key#util#TYPE.number
+    " <Tab>, <C-I> = 9
+    return a:input == 9 ? '<Tab>' : nr2char(a:input)
+  else
+    " Special characters
+    return g:which_key#util#special_keys[a:input]
+  endif
+endfunction
