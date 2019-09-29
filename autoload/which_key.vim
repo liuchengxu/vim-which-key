@@ -225,14 +225,11 @@ function! s:getchar() abort
     return ''
   endif
 
-  " <Tab>, <C-I> = 9
-  let input .= c == 9 ? '<Tab>' : nr2char(c)
-
+  let input .= which_key#util#parse_getchar(c)
   if s:has_children(input)
     while 1
       if !s:wait_with_timeout(g:which_key_timeout)
-        let c = getchar()
-        let input .= c == 9 ? '<Tab>' : nr2char(c)
+        let input .= which_key#util#parse_getchar(getchar())
       else
         break
       endif
