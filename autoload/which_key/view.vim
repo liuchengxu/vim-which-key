@@ -29,8 +29,9 @@ function! s:calc_layout(mappings) abort " {{{
 
   let prefix_length = values(map(copy(smap),
         \ 'strdisplaywidth(get(displaynames, toupper(v:key), v:key))'))
-  let suffix_length = values(map(smap, 'strdisplaywidth('.
-        \ 'type(v:val) ==s:TYPE.dict ? get(v:val, "name", "") : v:val[1])'))
+  let suffix_length = values(map(smap,
+        \ 'strdisplaywidth(type(v:val) ==s:TYPE.dict ?'.
+        \ 'get(v:val, "name", "") : v:val[1])'))
 
   let maxlength = max(prefix_length) + max(suffix_length)
         \ + strdisplaywidth(g:which_key_sep) + 2
