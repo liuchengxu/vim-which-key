@@ -26,17 +26,22 @@ function! s:calc_layout(mappings) abort " {{{
   let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == s:TYPE.list && v:val[1] == "which_key_ignore")')
   let layout.n_items = len(smap)
   let displaynames = which_key#view#get_displaynames()
-  let length = values(map(smap,
-        \ 'strdisplaywidth(get(displaynames, toupper(v:key), v:key).'.
-        \ '(type(v:val) == s:TYPE.dict ? get(v:val, "name", "") : v:val[1]))'))
 
-  let maxlength = max(length) + g:which_key_hspace
+  let prefix_length = values(map(copy(smap),
+        \ 'strdisplaywidth(get(displaynames, toupper(v:key), v:key))'))
+  let suffix_length = values(map(smap,
+        \ 'strdisplaywidth(type(v:val) ==s:TYPE.dict ?'.
+        \ 'get(v:val, "name", "") : v:val[1])'))
+
+  let maxlength = max(prefix_length) + max(suffix_length)
+        \ + strdisplaywidth(g:which_key_sep) + 2
   if g:which_key_vertical
     let layout.n_rows = winheight(0) - 2
     let layout.n_cols = layout.n_items / layout.n_rows + (layout.n_items != layout.n_rows)
     let layout.col_width = maxlength
     let layout.win_dim = layout.n_cols * layout.col_width
   else
+    let maxlength += g:which_key_hspace
     let layout.n_cols = winwidth(0) / maxlength
     let layout.n_rows = layout.n_items / layout.n_cols + (fmod(layout.n_items,layout.n_cols) > 0 ? 1 : 0)
     let layout.col_width = winwidth(0) / layout.n_cols
