@@ -6,6 +6,7 @@ CONTENTS                                              *vim-which-key-contents*
   1. Introduction........................................|vim-which-key-intro|
   2. Usage...............................................|vim-which-key-usage|
   3. Configuration......................................|vim-which-key-config|
+    3.1 Highlights..................................|vim-which-key-highlights|
   4. Commands.........................................|vim-which-key-commands|
   5. Functions.......................................|vim-which-key-functions|
 
@@ -325,6 +326,19 @@ COMMANDS                                              *vim-which-key-commands*
 :[range]WhichKeyVisual[!]                                    *:WhichKeyVisual*
 
   Same as |:WhichKey|, but opening the menu in visual mode.
+
+
+------------------------------------------------------------------------------
+|HIGHLIGHTS|                                            *vim-which-key-highlights*
+
+>
+    highlight default link WhichKey          Function
+    highlight default link WhichKeySeperator DiffAdded
+    highlight default link WhichKeyGroup     Keyword
+    highlight default link WhichKeyDesc      Identifier
+
+    highlight default link WhichKeyFloating Pmenu
+<
 
 ==============================================================================
 FUNCTIONS                                            *vim-which-key-functions*
