@@ -20,7 +20,7 @@ function! which_key#start(vis, bang, prefix) " {{{
   endif
 
   let key = a:prefix
-  let s:which_key_trigger = key ==# ' ' ? 'SPC' : key
+  let s:which_key_trigger = key ==# ' ' ? '<space>' : key
 
   if !has_key(s:cache, key) || g:which_key_run_map_on_popup
     " First run
@@ -50,6 +50,9 @@ function! which_key#start(vis, bang, prefix) " {{{
         let s:runtime = next_level
       elseif ty == s:TYPE.list
         call s:execute(next_level[0])
+        return
+      elseif g:which_key_fallback_to_native_key
+        call s:execute_native_fallback()
         return
       else
         call which_key#util#undefined(s:which_key_trigger)
@@ -263,7 +266,7 @@ function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
-    let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? 'SPC' : s:cur_char)
+    let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? '<space>' : s:cur_char)
     call add(s:last_runtime_stack, copy(s:runtime))
     let s:runtime = a:input
     call which_key#window#fill(s:runtime)
@@ -273,6 +276,11 @@ function! s:handle_input(input) " {{{
   if ty ==? s:TYPE.list
     call which_key#window#close()
     call s:execute(a:input[0])
+  elseif g:which_key_fallback_to_native_key
+    call which_key#window#close()
+    " Is redraw needed here?
+    " redraw!
+    call s:execute_native_fallback()
   else
     if g:which_key_ignore_invalid_key
       call which_key#wait_for_input()
@@ -282,6 +290,11 @@ function! s:handle_input(input) " {{{
       call which_key#util#undefined(s:which_key_trigger)
     endif
   endif
+endfunction
+
+function! s:execute_native_fallback() abort
+  let l:reg = which_key#util#get_register()
+  execute 'normal! '.s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
 endfunction
 
 function! s:join(...) abort
