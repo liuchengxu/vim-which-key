@@ -294,7 +294,14 @@ endfunction
 
 function! s:execute_native_fallback() abort
   let l:reg = which_key#util#get_register()
-  execute 'normal! '.s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
+  let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
+  try
+    execute 'normal! '.l:fallback_cmd
+  catch
+    echohl ErrorMsg
+    echom '[which-key] Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd
+    echohl None
+  endtry
 endfunction
 
 function! s:join(...) abort
