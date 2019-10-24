@@ -294,6 +294,16 @@ If you wish to hide a mapping from the menu set its description to
     nnoremap <leader>1 :1wincmd w<CR>
     let g:which_key_map.1 = 'which_key_ignore'
 >
+                                            *g:which_key_fallback_to_native_key*
+Type: |Number|
+Default: `0`
+
+Executes native commands if keymap is not defined.
+For example, you can use `:WhichKey 'g'` and get `gg` work correct:
+>
+    let g:which_key_fallback_to_native_key=1
+>
+
                                             *g:which_key_display_names*
 Type: |Dict|
 Default: `{ ' ': 'SPC', '<C-H>': 'BS', '<C-I>': 'TAB', '<TAB>': 'TAB', }`
