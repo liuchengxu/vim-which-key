@@ -17,7 +17,7 @@ function! which_key#map#parse(key, dict, visual) " {{{
 
   for line in lines
     let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
-    if mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
+    if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
       continue
     endif
 
