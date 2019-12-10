@@ -3,6 +3,10 @@ let s:winnr = -1
 
 let s:use_popup = exists('*popup_create') && g:which_key_use_floating_win
 
+if !hlexists('WhichKeyFloating')
+  hi default link WhichKeyFloating Pmenu
+endif
+
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
 
@@ -51,22 +55,40 @@ function! s:open_floating_win() abort
         \ }
 
   if g:which_key_relative_win
-    let opts.win = g:which_key_origin_winid
-    let opts.width = winwidth(g:which_key_origin_winid)
-    let opts.col = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0)
-    let opts.col = 60
     let opts.relative = 'win'
+    let opts.win = g:which_key_origin_winid
+    let offset = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+    let opts.width = winwidth(g:which_key_origin_winid) - offset
+    let opts.col = offset
   endif
 
   " TODO should handle the layout better
   let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
+  call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
+endfunction
 
-  if !hlexists('WhichKeyFloating')
-    hi default link WhichKeyFloating Pmenu
+function! s:show_floating_win(rows, layout) abort
+  let rows = s:append_prompt(a:rows)
+
+  silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
+
+  let opts = {
+        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
+        \ 'col': 0,
+        \ 'width': &columns,
+        \ 'height': a:layout.win_dim + 2,
+        \ 'relative': 'editor',
+        \ }
+
+  if g:which_key_relative_win
+    let opts.relative = 'win'
+    let offset = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+    let opts.win = g:which_key_origin_winid
+    let opts.width = winwidth(g:which_key_origin_winid) - offset
+    let opts.col = offset
   endif
-  if exists('&winhighlight')
-    setlocal winhighlight=Normal:WhichKeyFloating
-  endif
+
+  call nvim_win_set_config(s:floating_winid, opts)
 endfunction
 
 function! s:split_or_new() abort
@@ -114,29 +136,6 @@ function! s:show_popup(rows) abort
           \ })
   call popup_settext(s:popup_id, rows)
   call popup_show(s:popup_id)
-endfunction
-
-function! s:show_floating_win(rows, layout) abort
-  let rows = s:append_prompt(a:rows)
-  call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
-
-  let opts = {
-        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
-        \ 'col': 0,
-        \ 'width': &columns,
-        \ 'height': a:layout.win_dim + 2,
-        \ 'relative': 'editor',
-        \ }
-
-  if g:which_key_relative_win
-    let opts.win = g:which_key_origin_winid
-    let opts.width = winwidth(g:which_key_origin_winid)
-    let opts.col = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0)
-    let opts.col = 60
-    let opts.relative = 'win'
-  endif
-
-  call nvim_win_set_config(s:floating_winid, opts)
 endfunction
 
 function! which_key#window#fill(runtime) abort
