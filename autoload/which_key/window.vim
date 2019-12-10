@@ -101,11 +101,16 @@ endfunction
 
 function! s:show_popup(rows) abort
   let rows = s:append_prompt(a:rows)
-  let col = &signcolumn ==# 'yes' ? 2 : 1
-  let col += &number ? &numberwidth : 0
+  let sign_width = &signcolumn ==# 'yes' ? 2 : 0
+  let lnum_width = &number ? strlen(line('$')) : 0
+  let col = sign_width + lnum_width
+  let col += win_screenpos(g:which_key_origin_winid)[1]
+  let width = winwidth(g:which_key_origin_winid)
   call popup_move(s:popup_id, {
           \ 'line': &lines - len(rows) - &cmdheight,
-          \ 'col': col
+          \ 'col': col + 1,
+          \ 'maxwidth': width - sign_width - lnum_width - 2,
+          \ 'minwidth': width - sign_width - lnum_width - 2,
           \ })
   call popup_settext(s:popup_id, rows)
   call popup_show(s:popup_id)
