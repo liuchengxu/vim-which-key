@@ -41,16 +41,25 @@ function! s:open_floating_win() abort
   if !bufexists(s:bufnr)
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
-  " TODO should handle the layout better
-  call nvim_open_win(
-        \ s:bufnr, v:true,
-        \ {
-        \   'relative': 'editor',
+
+  let opts = {
         \   'row': &lines - 14,
         \   'col': 0,
         \   'width': &columns,
-        \   'height': 120
-        \ })
+        \   'height': 120,
+        \   'relative': 'editor',
+        \ }
+
+  if g:which_key_relative_win
+    let opts.win = g:which_key_origin_winid
+    let opts.width = winwidth(g:which_key_origin_winid)
+    let opts.col = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0)
+    let opts.col = 60
+    let opts.relative = 'win'
+  endif
+
+  " TODO should handle the layout better
+  let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
 
   if !hlexists('WhichKeyFloating')
     hi default link WhichKeyFloating Pmenu
@@ -105,15 +114,24 @@ endfunction
 function! s:show_floating_win(rows, layout) abort
   let rows = s:append_prompt(a:rows)
   call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
-  call nvim_win_set_config(
-        \ win_getid(s:winnr),
-        \ {
-        \   'relative': 'editor',
-        \   'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
-        \   'col': 0,
-        \   'width': &columns,
-        \   'height': a:layout.win_dim + 2
-        \ })
+
+  let opts = {
+        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
+        \ 'col': 0,
+        \ 'width': &columns,
+        \ 'height': a:layout.win_dim + 2,
+        \ 'relative': 'editor',
+        \ }
+
+  if g:which_key_relative_win
+    let opts.win = g:which_key_origin_winid
+    let opts.width = winwidth(g:which_key_origin_winid)
+    let opts.col = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0)
+    let opts.col = 60
+    let opts.relative = 'win'
+  endif
+
+  call nvim_win_set_config(s:floating_winid, opts)
 endfunction
 
 function! which_key#window#fill(runtime) abort

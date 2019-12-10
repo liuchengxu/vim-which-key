@@ -2,6 +2,8 @@ let s:desc = get(s:, 'desc', {})
 let s:cache = get(s:, 'cache', {})
 let s:TYPE = g:which_key#util#TYPE
 
+let s:should_note_winid = exists('*win_getid')
+
 function! which_key#register(prefix, dict) abort
   let key = a:prefix ==? '<Space>' ? ' ' : a:prefix
   let val = a:dict
@@ -12,6 +14,10 @@ function! which_key#start(vis, bang, prefix) " {{{
   let s:vis = a:vis ? 'gv' : ''
   let s:count = v:count != 0 ? v:count : ''
   let s:which_key_trigger = ''
+
+  if s:should_note_winid
+    let g:which_key_origin_winid = win_getid()
+  endif
 
   if a:bang
     let s:runtime = a:prefix
