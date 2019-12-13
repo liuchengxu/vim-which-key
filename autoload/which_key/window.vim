@@ -41,29 +41,35 @@ function! which_key#window#open(runtime) abort
   call which_key#window#fill(a:runtime)
 endfunction
 
+function! s:inject_relative_win_opts(opts) abort
+  let opts = a:opts
+  let opts.win = g:which_key_origin_winid
+  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  let opts.col = offset
+  let opts.width = winwidth(g:which_key_origin_winid) - offset
+  let opts.relative = 'win'
+  return opts
+endfunction
+
 function! s:open_floating_win() abort
   if !bufexists(s:bufnr)
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
 
-  let opts = {
-        \   'row': &lines - 14,
-        \   'col': 0,
-        \   'width': &columns,
-        \   'height': 120,
-        \   'relative': 'editor',
-        \ }
+  let opts = {}
+  let opts.row = &lines - 14
+  let opts.height = 120
 
-  if g:which_key_relative_win
-    let opts.relative = 'win'
-    let opts.win = g:which_key_origin_winid
-    let offset = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0) + 1
-    let opts.width = winwidth(g:which_key_origin_winid) - offset
-    let opts.col = offset
+  if g:which_key_floating_relative_win
+    let opts = s:inject_relative_win_opts(opts)
+  else
+    let opts.col = 0
+    let opts.width = &columns
+    let opts.relative = 'editor'
   endif
 
   " TODO should handle the layout better
-  let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
+  silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
   call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
 endfunction
 
@@ -72,20 +78,16 @@ function! s:show_floating_win(rows, layout) abort
 
   silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
 
-  let opts = {
-        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
-        \ 'col': 0,
-        \ 'width': &columns,
-        \ 'height': a:layout.win_dim + 2,
-        \ 'relative': 'editor',
-        \ }
+  let opts = {}
+  let opts.row = &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1
+  let opts.height = a:layout.win_dim + 2
 
-  if g:which_key_relative_win
-    let opts.relative = 'win'
-    let offset = strlen(line('$')) + (&signcolumn ==# 'yes' ? 2: 0) + 1
-    let opts.win = g:which_key_origin_winid
-    let opts.width = winwidth(g:which_key_origin_winid) - offset
-    let opts.col = offset
+  if g:which_key_floating_relative_win
+    let opts = s:inject_relative_win_opts(opts)
+  else
+    let opts.col = 0
+    let opts.width = &columns
+    let opts.relative = 'editor'
   endif
 
   call nvim_win_set_config(s:floating_winid, opts)
@@ -100,8 +102,7 @@ function! s:split_or_new() abort
     noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
     cmapclear <buffer>
     if qfbuf
-      let bnum = bufnr('%')
-      noautocmd execute bnum.'bwipeout!'
+      noautocmd execute bufnr('%').'bwipeout!'
     endif
   else
     let splitcmd = g:which_key_vertical ? '1vnew' : '1new'
@@ -123,16 +124,14 @@ endfunction
 
 function! s:show_popup(rows) abort
   let rows = s:append_prompt(a:rows)
-  let sign_width = &signcolumn ==# 'yes' ? 2 : 0
-  let lnum_width = &number ? strlen(line('$')) : 0
-  let col = sign_width + lnum_width
-  let col += win_screenpos(g:which_key_origin_winid)[1]
-  let width = winwidth(g:which_key_origin_winid)
+  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  let col = offset + win_screenpos(g:which_key_origin_winid)[1]
+  let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
   call popup_move(s:popup_id, {
+          \ 'col': col,
           \ 'line': &lines - len(rows) - &cmdheight,
-          \ 'col': col + 1,
-          \ 'maxwidth': width - sign_width - lnum_width - 2,
-          \ 'minwidth': width - sign_width - lnum_width - 2,
+          \ 'maxwidth': maxwidth,
+          \ 'minwidth': maxwidth,
           \ })
   call popup_settext(s:popup_id, rows)
   call popup_show(s:popup_id)
@@ -147,19 +146,17 @@ function! which_key#window#fill(runtime) abort
 
   if s:use_popup
     call s:show_popup(rows)
+  elseif g:which_key_use_floating_win
+    call s:show_floating_win(rows, layout)
   else
-    if g:which_key_use_floating_win
-      call s:show_floating_win(rows, layout)
-    else
-      let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-      noautocmd execute resize layout.win_dim
-      setlocal modifiable
-      " Delete all lines in the buffer
-      " Use black hole register to avoid affecting the normal registers. :h quote_
-      silent 1,$delete _
-      call setline(1, rows)
-      setlocal nomodifiable
-    endif
+    let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+    noautocmd execute resize layout.win_dim
+    setlocal modifiable
+    " Delete all lines in the buffer
+    " Use black hole register to avoid affecting the normal registers. :h quote_
+    silent 1,$delete _
+    call setline(1, rows)
+    setlocal nomodifiable
   endif
 
   call which_key#wait_for_input()
