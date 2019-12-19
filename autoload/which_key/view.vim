@@ -35,6 +35,8 @@ function! s:calc_layout(mappings) abort " {{{
 
   let maxlength = max(prefix_length) + max(suffix_length)
         \ + strdisplaywidth(g:which_key_sep) + 2
+
+  " TODO crate a layout that is not based on the current window?
   if g:which_key_vertical
     let layout.n_rows = winheight(0) - 2
     let layout.n_cols = layout.n_items / layout.n_rows + (layout.n_items != layout.n_rows)

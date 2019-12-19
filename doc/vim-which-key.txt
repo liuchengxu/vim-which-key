@@ -229,6 +229,17 @@ Default: `1`
 
 Make the vim popup or neovim floating_win relative to current window.
 
+                                                   *g:which_key_floating_opts*
+Type: |Dict|
+Default: `Undefined`
+
+You could use this variable to adjust the floating window layout. The
+key is either `row`, `col`, `width` or `height`. The value is a String of `+[number]`
+or `-[number]` which means plus or minus `numberl` based on the default value
+caculated by vim-which-key.
+>
+ let g:which_key_floating_opts = { 'row': '-1' }
+
                                                 *g:which_key_run_map_on_popup*
 Type: |Number|
 Default: `0`

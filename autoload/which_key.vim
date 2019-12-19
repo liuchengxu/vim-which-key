@@ -217,7 +217,7 @@ function! s:getchar() abort
   if c == "\<BS>"
     " Top level
     if empty(s:last_runtime_stack)
-      call which_key#window#fill(s:runtime)
+      call which_key#window#show(s:runtime)
       return ''
     endif
 
@@ -230,7 +230,7 @@ function! s:getchar() abort
 
     unlet s:last_runtime_stack[-1]
 
-    call which_key#window#fill(last_runtime)
+    call which_key#window#show(last_runtime)
     return ''
   endif
 
@@ -275,7 +275,7 @@ function! s:handle_input(input) " {{{
     let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? '<space>' : s:cur_char)
     call add(s:last_runtime_stack, copy(s:runtime))
     let s:runtime = a:input
-    call which_key#window#fill(s:runtime)
+    call which_key#window#show(s:runtime)
     return
   endif
 
