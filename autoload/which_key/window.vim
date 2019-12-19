@@ -18,16 +18,6 @@ function! s:hide_cursor() abort
   setlocal t_ve=
 endfunction
 
-function! s:inject_relative_win_opts(opts) abort
-  let opts = a:opts
-  let opts.win = g:which_key_origin_winid
-  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
-  let opts.col = offset
-  let opts.width = winwidth(g:which_key_origin_winid) - offset
-  let opts.relative = 'win'
-  return opts
-endfunction
-
 function! s:split_or_new() abort
   let position = g:which_key_position ==? 'topleft' ? 'topleft' : 'botright'
 
@@ -84,6 +74,16 @@ function! s:apply_custom_floating_opts(opts) abort
   return opts
 endfunction
 
+function! s:inject_relative_win_opts(opts) abort
+  let opts = a:opts
+  let opts.win = g:which_key_origin_winid
+  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  let opts.col = offset
+  let opts.width = winwidth(g:which_key_origin_winid) - offset
+  let opts.relative = 'win'
+  return opts
+endfunction
+
 function! s:show_floating_win(rows, layout) abort
   let rows = s:append_prompt(a:rows)
 
@@ -102,6 +102,10 @@ function! s:show_floating_win(rows, layout) abort
           \ 'height': a:layout.win_dim + 2,
           \ 'relative': 'editor',
           \ }
+
+  if g:which_key_floating_relative_win
+    let opts = s:inject_relative_win_opts(opts)
+  endif
 
   let opts = s:apply_custom_floating_opts(opts)
 
