@@ -3,61 +3,19 @@ let s:winnr = -1
 
 let s:use_popup = exists('*popup_create') && g:which_key_use_floating_win
 
-function! which_key#window#open(runtime) abort
-  let s:pos = [winsaveview(), winnr(), winrestcmd()]
+if !hlexists('WhichKeyFloating')
+  hi default link WhichKeyFloating Pmenu
+endif
 
-  if s:use_popup
-    if !exists('s:popup_id')
-      let s:popup_id = popup_create([], {})
-      call popup_hide(s:popup_id)
-      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
-      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-    endif
-  else
-    if g:which_key_use_floating_win
-      call s:open_floating_win()
-    else
-      call s:split_or_new()
-    endif
-
-    setlocal filetype=which_key
-
-    " Hides/restores cursor at the start/end of the guide, works in vim
-    " Snippets from vim-game-code-break
-    augroup which_key_cursor
-      autocmd!
-      execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-      execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
-    augroup END
-    setlocal t_ve=
-
-    let s:winnr = winnr()
-  endif
-
-  call which_key#window#fill(a:runtime)
-endfunction
-
-function! s:open_floating_win() abort
-  if !bufexists(s:bufnr)
-    let s:bufnr = nvim_create_buf(v:false, v:false)
-  endif
-  " TODO should handle the layout better
-  call nvim_open_win(
-        \ s:bufnr, v:true,
-        \ {
-        \   'relative': 'editor',
-        \   'row': &lines - 14,
-        \   'col': 0,
-        \   'width': &columns,
-        \   'height': 120
-        \ })
-
-  if !hlexists('WhichKeyFloating')
-    hi default link WhichKeyFloating Pmenu
-  endif
-  if exists('&winhighlight')
-    setlocal winhighlight=Normal:WhichKeyFloating
-  endif
+function! s:hide_cursor() abort
+  " Hides/restores cursor at the start/end of the guide, works in vim
+  " Snippets from vim-game-code-break
+  augroup which_key_cursor
+    autocmd!
+    execute 'autocmd BufLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+    execute 'autocmd VimLeave <buffer> set t_ve=' . escape(&t_ve, '|')
+  augroup END
+  setlocal t_ve=
 endfunction
 
 function! s:split_or_new() abort
@@ -102,21 +60,51 @@ function! s:show_popup(rows) abort
   call popup_show(s:popup_id)
 endfunction
 
-function! s:show_floating_win(rows, layout) abort
-  let rows = s:append_prompt(a:rows)
-  call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
-  call nvim_win_set_config(
-        \ win_getid(s:winnr),
-        \ {
-        \   'relative': 'editor',
-        \   'row': &lines - nvim_buf_line_count(s:bufnr) - &cmdheight - 1,
-        \   'col': 0,
-        \   'width': &columns,
-        \   'height': a:layout.win_dim + 2
-        \ })
+function! s:apply_custom_floating_opts(opts) abort
+  let opts = a:opts
+  if exists('g:which_key_floating_opts')
+    for [key, val] in items(g:which_key_floating_opts)
+      if has_key(opts, key)
+        let opts[key] = opts[key] + eval('0'.val)
+      endif
+    endfor
+  endif
+  return opts
 endfunction
 
-function! which_key#window#fill(runtime) abort
+function! s:show_floating_win(rows, layout) abort
+  let rows = s:append_prompt(a:rows)
+
+  if !bufexists(s:bufnr)
+    let s:bufnr = nvim_create_buf(v:false, v:false)
+  endif
+  silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
+
+  let col_offset = strlen(string(line('$'))) + (&signcolumn ==# 'yes' ? 2 : 0)
+  let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
+
+  let opts = {
+          \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
+          \ 'col': col_offset,
+          \ 'width': &columns - col_offset,
+          \ 'height': a:layout.win_dim + 2,
+          \ 'relative': 'editor',
+          \ }
+
+  let opts = s:apply_custom_floating_opts(opts)
+
+  if !exists('s:floating_winid')
+    silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
+
+    call s:hide_cursor()
+    call setbufvar(s:bufnr, '&ft', 'which_key')
+    call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
+  else
+    call nvim_win_set_config(s:floating_winid, opts)
+  endif
+endfunction
+
+function! which_key#window#show(runtime) abort
   let runtime = a:runtime
 
   let s:name = get(runtime, 'name', '')
@@ -125,36 +113,66 @@ function! which_key#window#fill(runtime) abort
 
   if s:use_popup
     call s:show_popup(rows)
+  elseif g:which_key_use_floating_win
+    call s:show_floating_win(rows, layout)
   else
-    if g:which_key_use_floating_win
-      call s:show_floating_win(rows, layout)
-    else
-      let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-      noautocmd execute resize layout.win_dim
-      setlocal modifiable
-      " Delete all lines in the buffer
-      " Use black hole register to avoid affecting the normal registers. :h quote_
-      silent 1,$delete _
-      call setline(1, rows)
-      setlocal nomodifiable
-    endif
+    let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+    noautocmd execute resize layout.win_dim
+    setlocal modifiable
+    " Delete all lines in the buffer
+    " Use black hole register to avoid affecting the normal registers. :h quote_
+    silent 1,$delete _
+    call setline(1, rows)
+    setlocal nomodifiable
   endif
 
   call which_key#wait_for_input()
 endfunction
 
+function! which_key#window#open(runtime) abort
+  let s:pos = [winsaveview(), winnr(), winrestcmd()]
+
+  if s:use_popup
+    if !exists('s:popup_id')
+      let s:popup_id = popup_create([], {})
+      call popup_hide(s:popup_id)
+      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+    endif
+  else
+    if !g:which_key_use_floating_win
+      call s:split_or_new()
+      call s:hide_cursor()
+      setlocal filetype=which_key
+      let s:winnr = winnr()
+    endif
+  endif
+
+  call which_key#window#show(a:runtime)
+endfunction
+
+function! s:close_splitted_win() abort
+  noautocmd execute s:winnr.'wincmd w'
+  if winnr() == s:winnr
+    close!
+    execute s:pos[-1]
+    noautocmd execute s:pos[1].'wincmd w'
+    call winrestview(s:pos[0])
+    let s:winnr = -1
+  endif
+endfunction
+
 function! which_key#window#close() abort
+  if exists('s:floating_winid')
+    call nvim_win_close(s:floating_winid, v:true)
+    unlet s:floating_winid
+    return
+  endif
+
   if exists('s:popup_id')
     call popup_hide(s:popup_id)
   else
-    noautocmd execute s:winnr.'wincmd w'
-    if winnr() == s:winnr
-      close!
-      execute s:pos[-1]
-      noautocmd execute s:pos[1].'wincmd w'
-      call winrestview(s:pos[0])
-      let s:winnr = -1
-    endif
+    call s:close_splitted_win()
   endif
 endfunction
 
