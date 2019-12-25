@@ -47,11 +47,20 @@ function! s:append_prompt(rows) abort
   return rows
 endfunction
 
+function! s:floating_win_col_offset() abort
+  return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+endfunction
+
 function! s:show_popup(rows) abort
   let rows = s:append_prompt(a:rows)
-  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
-  let col = offset + win_screenpos(g:which_key_origin_winid)[1]
-  let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+  let offset = s:floating_win_col_offset()
+  if g:which_key_floating_relative_win
+    let col = offset + win_screenpos(g:which_key_origin_winid)[1]
+    let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+  else
+    let col = offset
+    let maxwidth = &columns - offset - 1
+  endif
   call popup_move(s:popup_id, {
           \ 'col': col,
           \ 'line': &lines - len(rows) - &cmdheight,
@@ -77,7 +86,7 @@ endfunction
 function! s:inject_relative_win_opts(opts) abort
   let opts = a:opts
   let opts.win = g:which_key_origin_winid
-  let offset = (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  let offset = s:floating_win_col_offset()
   let opts.col = offset
   let opts.width = winwidth(g:which_key_origin_winid) - offset
   let opts.relative = 'win'
@@ -148,26 +157,22 @@ endfunction
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
 
-  if s:use_popup
-    if !exists('s:popup_id')
-      let s:popup_id = popup_create([], {})
-      call popup_hide(s:popup_id)
-      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
-      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-    endif
-  else
-    if !g:which_key_use_floating_win
-      call s:split_or_new()
-      call s:hide_cursor()
-      setlocal filetype=which_key
-      let s:winnr = winnr()
-    endif
+  if s:use_popup && !exists('s:popup_id')
+    let s:popup_id = popup_create([], {})
+    call popup_hide(s:popup_id)
+    call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+    call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+  elseif !g:which_key_use_floating_win
+    call s:split_or_new()
+    call s:hide_cursor()
+    setlocal filetype=which_key
+    let s:winnr = winnr()
   endif
 
   call which_key#window#show(a:runtime)
 endfunction
 
-function! s:close_splitted_win() abort
+function! s:close_split_win() abort
   noautocmd execute s:winnr.'wincmd w'
   if winnr() == s:winnr
     close!
@@ -188,7 +193,7 @@ function! which_key#window#close() abort
   if exists('s:popup_id')
     call popup_hide(s:popup_id)
   else
-    call s:close_splitted_win()
+    call s:close_split_win()
   endif
 endfunction
 
