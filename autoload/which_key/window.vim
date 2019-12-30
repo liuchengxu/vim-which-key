@@ -49,6 +49,13 @@ function! s:append_prompt(rows) abort
 endfunction
 
 function! s:show_popup(rows) abort
+  if !exists('s:popup_id')
+    let s:popup_id = popup_create([], {})
+    call popup_hide(s:popup_id)
+    call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+    call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+  endif
+
   let rows = s:append_prompt(a:rows)
   let col = &signcolumn ==# 'yes' ? 2 : 1
   let col += &number ? &numberwidth : 0
@@ -132,20 +139,11 @@ endfunction
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
 
-  if s:use_popup
-    if !exists('s:popup_id')
-      let s:popup_id = popup_create([], {})
-      call popup_hide(s:popup_id)
-      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
-      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-    endif
-  else
-    if !g:which_key_use_floating_win
-      call s:split_or_new()
-      call s:hide_cursor()
-      setlocal filetype=which_key
-      let s:winnr = winnr()
-    endif
+  if !g:which_key_use_floating_win
+    call s:split_or_new()
+    call s:hide_cursor()
+    setlocal filetype=which_key
+    let s:winnr = winnr()
   endif
 
   call which_key#window#show(a:runtime)
@@ -170,7 +168,8 @@ function! which_key#window#close() abort
   endif
 
   if exists('s:popup_id')
-    call popup_hide(s:popup_id)
+    call popup_close(s:popup_id)
+    unlet s:popup_id
   else
     call s:close_splitted_win()
   endif
