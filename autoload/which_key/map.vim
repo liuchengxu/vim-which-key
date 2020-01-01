@@ -44,6 +44,7 @@ function! which_key#map#parse(key, dict, visual) " {{{
       if (visual && match(mapd.mode, "[vx ]") >= 0) ||
             \ (!visual && match(mapd.mode, "[vx]") == -1)
         let mapd.lhs = which_key#util#string_to_keys(mapd.lhs)
+        let mapd.lhs = [mapd.lhs[-1]]
         call s:add_map_to_dict(mapd, 0, a:dict)
       endif
     endif
