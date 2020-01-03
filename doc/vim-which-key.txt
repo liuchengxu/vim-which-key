@@ -223,6 +223,12 @@ put your current window layout untouched compared to splitting a new window.
   let g:which_key_use_floating_win = 1
 <
 
+                                              *g:which_key_floating_relative_win*
+Type: |Number|
+Default: `0`
+
+Make the vim popup or neovim floating_win relative to current window.
+
                                                    *g:which_key_floating_opts*
 Type: |Dict|
 Default: `Undefined`

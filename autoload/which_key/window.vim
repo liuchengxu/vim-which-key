@@ -27,8 +27,7 @@ function! s:split_or_new() abort
     noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
     cmapclear <buffer>
     if qfbuf
-      let bnum = bufnr('%')
-      noautocmd execute bnum.'bwipeout!'
+      noautocmd execute bufnr('%').'bwipeout!'
     endif
   else
     let splitcmd = g:which_key_vertical ? '1vnew' : '1new'
@@ -48,6 +47,10 @@ function! s:append_prompt(rows) abort
   return rows
 endfunction
 
+function! s:floating_win_col_offset() abort
+  return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+endfunction
+
 function! s:show_popup(rows) abort
   if !exists('s:popup_id')
     let s:popup_id = popup_create([], {})
@@ -57,11 +60,19 @@ function! s:show_popup(rows) abort
   endif
 
   let rows = s:append_prompt(a:rows)
-  let col = &signcolumn ==# 'yes' ? 2 : 1
-  let col += &number ? &numberwidth : 0
+  let offset = s:floating_win_col_offset()
+  if g:which_key_floating_relative_win
+    let col = offset + win_screenpos(g:which_key_origin_winid)[1]
+    let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+  else
+    let col = offset
+    let maxwidth = &columns - offset - 1
+  endif
   call popup_move(s:popup_id, {
+          \ 'col': col,
           \ 'line': &lines - len(rows) - &cmdheight,
-          \ 'col': col
+          \ 'maxwidth': maxwidth,
+          \ 'minwidth': maxwidth,
           \ })
   call popup_settext(s:popup_id, rows)
   call popup_show(s:popup_id)
@@ -76,6 +87,16 @@ function! s:apply_custom_floating_opts(opts) abort
       endif
     endfor
   endif
+  return opts
+endfunction
+
+function! s:inject_relative_win_opts(opts) abort
+  let opts = a:opts
+  let opts.win = g:which_key_origin_winid
+  let offset = s:floating_win_col_offset()
+  let opts.col = offset
+  let opts.width = winwidth(g:which_key_origin_winid) - offset
+  let opts.relative = 'win'
   return opts
 endfunction
 
@@ -97,6 +118,10 @@ function! s:show_floating_win(rows, layout) abort
           \ 'height': a:layout.win_dim + 2,
           \ 'relative': 'editor',
           \ }
+
+  if g:which_key_floating_relative_win
+    let opts = s:inject_relative_win_opts(opts)
+  endif
 
   let opts = s:apply_custom_floating_opts(opts)
 
@@ -149,7 +174,7 @@ function! which_key#window#open(runtime) abort
   call which_key#window#show(a:runtime)
 endfunction
 
-function! s:close_splitted_win() abort
+function! s:close_split_win() abort
   noautocmd execute s:winnr.'wincmd w'
   if winnr() == s:winnr
     close!
@@ -171,7 +196,7 @@ function! which_key#window#close() abort
     call popup_close(s:popup_id)
     unlet s:popup_id
   else
-    call s:close_splitted_win()
+    call s:close_split_win()
   endif
 endfunction
 
