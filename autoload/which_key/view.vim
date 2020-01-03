@@ -38,15 +38,28 @@ function! s:calc_layout(mappings) abort " {{{
 
   " TODO crate a layout that is not based on the current window?
   if g:which_key_vertical
-    let layout.n_rows = winheight(0) - 2
+
+    if g:which_key_floating_relative_win
+      let layout.n_rows = winheight(g:which_key_origin_winid) - 2
+    else
+      let layout.n_rows = winheight(0) - 2
+    endif
+
     let layout.n_cols = layout.n_items / layout.n_rows + (layout.n_items != layout.n_rows)
     let layout.col_width = maxlength
     let layout.win_dim = layout.n_cols * layout.col_width
   else
     let maxlength += g:which_key_hspace
-    let layout.n_cols = winwidth(0) / maxlength
+
+    if g:which_key_floating_relative_win
+      let winwidth = winwidth(g:which_key_origin_winid)
+    else
+      let winwidth = winwidth(0)
+    endif
+
+    let layout.n_cols = winwidth / maxlength
     let layout.n_rows = layout.n_items / layout.n_cols + (fmod(layout.n_items,layout.n_cols) > 0 ? 1 : 0)
-    let layout.col_width = winwidth(0) / layout.n_cols
+    let layout.col_width = winwidth / layout.n_cols
     let layout.win_dim = layout.n_rows
   endif
 
