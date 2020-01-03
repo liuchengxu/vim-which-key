@@ -52,6 +52,13 @@ function! s:floating_win_col_offset() abort
 endfunction
 
 function! s:show_popup(rows) abort
+  if !exists('s:popup_id')
+    let s:popup_id = popup_create([], {})
+    call popup_hide(s:popup_id)
+    call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+    call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+  endif
+
   let rows = s:append_prompt(a:rows)
   let offset = s:floating_win_col_offset()
   if g:which_key_floating_relative_win
@@ -157,12 +164,7 @@ endfunction
 function! which_key#window#open(runtime) abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
 
-  if s:use_popup && !exists('s:popup_id')
-    let s:popup_id = popup_create([], {})
-    call popup_hide(s:popup_id)
-    call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
-    call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-  elseif !g:which_key_use_floating_win
+  if !g:which_key_use_floating_win
     call s:split_or_new()
     call s:hide_cursor()
     setlocal filetype=which_key
@@ -191,7 +193,8 @@ function! which_key#window#close() abort
   endif
 
   if exists('s:popup_id')
-    call popup_hide(s:popup_id)
+    call popup_close(s:popup_id)
+    unlet s:popup_id
   else
     call s:close_split_win()
   endif
