@@ -22,7 +22,9 @@ function! which_key#map#parse(key, dict, visual) " {{{
     endif
 
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
-
+    if !has('nvim') && key[0:2] == '<M-'
+        let key = eval('"\' . key . '"')
+    endif
     let mapd.lhs = substitute(mapd.lhs, key, '', '')
     " FIXME: <Plug>(easymotion-prefix)
     if mapd.lhs ==? '<Space>'
