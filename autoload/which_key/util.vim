@@ -115,8 +115,10 @@ function! which_key#util#parse_getchar(input)
   if type(a:input) == g:which_key#util#TYPE.number
     " <Tab>, <C-I> = 9
     return a:input == 9 ? '<Tab>' : nr2char(a:input)
-  else
+  elseif has_key(g:which_key#util#special_keys, a:input)
     " Special characters
     return g:which_key#util#special_keys[a:input]
+  else
+    return a:input
   endif
 endfunction

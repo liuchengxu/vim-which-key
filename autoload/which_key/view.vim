@@ -23,7 +23,7 @@ endfunction
 
 function! s:calc_layout(mappings) abort " {{{
   let layout = {}
-  let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == s:TYPE.list && v:val[1] == "which_key_ignore")')
+  let smap = filter(copy(a:mappings), 'v:key !=# "name" && !(type(v:val) == s:TYPE.list && v:val[1] ==# "which_key_ignore")')
   let layout.n_items = len(smap)
   let displaynames = which_key#view#get_displaynames()
 
@@ -98,8 +98,8 @@ function! s:create_rows(layout, mappings) abort
 
   for k in smap
     let key = get(displaynames, toupper(k), k)
-    let desc = type(mappings[k]) == s:TYPE.dict ? get(mappings[k], "name", "") : mappings[k][1]
-    if desc == 'which_key_ignore'
+    let desc = type(mappings[k]) == s:TYPE.dict ? get(mappings[k], 'name', '') : mappings[k][1]
+    if desc ==# 'which_key_ignore'
       continue
     endif
 
@@ -154,7 +154,7 @@ endfunction
 function! s:escape_keys(inp) abort " {{{
   " :h <>
   let l:ret = a:inp
-  let l:ret = substitute(l:ret, "<", "<lt>", "")
-  let l:ret = substitute(l:ret, "|", "<Bar>", "")
+  let l:ret = substitute(l:ret, '<', '<lt>', '')
+  let l:ret = substitute(l:ret, '|', '<Bar>', '')
   return l:ret
 endfunction " }}}

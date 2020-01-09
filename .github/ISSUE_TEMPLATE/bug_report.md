@@ -13,7 +13,7 @@ _Instructions: Replace the template text and remove irrelevant text (including t
 **Environment (please complete the following information):**
  - OS: ???
  - (Neo)Vim version: ???
- - vim-whichkey version: ???
+ - vim-which-key version: ???
  - Have you reproduced with a minimal vimrc: ???
 
 **Describe the bug**
