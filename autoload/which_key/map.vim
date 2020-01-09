@@ -10,7 +10,7 @@ endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
 function! which_key#map#parse(key, dict, visual) " {{{
-  let key = a:key ==? ' ' ? "<Space>" : a:key
+  let key = a:key ==? ' ' ? '<Space>' : a:key
   let visual = a:visual
 
   let lines = s:get_raw_key_mapping(key)
@@ -31,10 +31,10 @@ function! which_key#map#parse(key, dict, visual) " {{{
       continue
     endif
 
-    let mapd.lhs = substitute(mapd.lhs, "<Space>", " ", "g")
-    let mapd.lhs = substitute(mapd.lhs, "<Tab>", "<C-I>", "g")
+    let mapd.lhs = substitute(mapd.lhs, '<Space>', ' ', 'g')
+    let mapd.lhs = substitute(mapd.lhs, '<Tab>', '<C-I>', 'g')
 
-    let mapd.rhs = substitute(mapd.rhs, "<SID>", "<SNR>".mapd['sid']."_", "g")
+    let mapd.rhs = substitute(mapd.rhs, '<SID>', '<SNR>'.mapd['sid'].'_', 'g')
 
     " eval the expression as the final {rhs}
     " Ref #60
@@ -42,9 +42,9 @@ function! which_key#map#parse(key, dict, visual) " {{{
       let mapd.rhs = eval(mapd.rhs)
     endif
 
-    if mapd.lhs != '' && mapd.display !~# 'WhichKey.*'
-      if (visual && match(mapd.mode, "[vx ]") >= 0) ||
-            \ (!visual && match(mapd.mode, "[vx]") == -1)
+    if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
+      if (visual && match(mapd.mode, '[vx ]') >= 0) ||
+            \ (!visual && match(mapd.mode, '[vx]') == -1)
         let mapd.lhs = which_key#util#string_to_keys(mapd.lhs)
         call s:add_map_to_dict(mapd, 0, a:dict)
       endif
@@ -53,7 +53,7 @@ function! which_key#map#parse(key, dict, visual) " {{{
 endfunction
 
 function! s:escape(mapping) abort " {{{
-  let feedkeyargs = a:mapping.noremap ? "nt" : "mt"
+  let feedkeyargs = a:mapping.noremap ? 'nt' : 'mt'
   let rhs = substitute(a:mapping.rhs, '\', '\\\\', 'g')
   let rhs = substitute(rhs, '<\([^<>]*\)>', '\\<\1>', 'g')
   let rhs = substitute(rhs, '"', '\\"', 'g')
