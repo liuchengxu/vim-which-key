@@ -80,7 +80,7 @@ function! which_key#util#format(mapping) abort
 endfunction
 
 function! s:m_char(char)
-  if a:char == '"'
+  if a:char ==# '"'
     return ["<M-\">", "\<M-\">"]
   endif
   let m_char = '<M-' . a:char . '>'
@@ -89,7 +89,23 @@ function! s:m_char(char)
 endfunction
 
 let s:chars = map(range(32, 126), 'nr2char(v:val)')
-let g:which_key#util#special_keys = {"\<C-Space>": "<C-Space>"}
+
+let g:which_key#util#special_keys = {
+      \ "\<Up>": '<Up>',
+      \ "\<Down>": '<Down>',
+      \ "\<Left>": '<Left>',
+      \ "\<Right>": '<Right>',
+      \ "\<LeftMouse>": '<LeftMouse>',
+      \ "\<RightMouse>": '<RightMouse>',
+      \ "\<MiddleMouse>": '<MiddleMouse>',
+      \ "\<2-LeftMouse>": '<2-LeftMouse>',
+      \ "\<C-LeftMouse>": '<C-LeftMouse>',
+      \ "\<S-LeftMouse>": '<S-LeftMouse>',
+      \ "\<ScrollWheelUp>": '<ScrollWheelUp>',
+      \ "\<ScrollWheelDown>": '<ScrollWheelDown>',
+      \ "\<C-Space>": '<C-Space>',
+      \ }
+
 for c in s:chars
   let [key, code] = s:m_char(c)
   let g:which_key#util#special_keys[code] = key
@@ -99,8 +115,10 @@ function! which_key#util#parse_getchar(input)
   if type(a:input) == g:which_key#util#TYPE.number
     " <Tab>, <C-I> = 9
     return a:input == 9 ? '<Tab>' : nr2char(a:input)
-  else
+  elseif has_key(g:which_key#util#special_keys, a:input)
     " Special characters
     return g:which_key#util#special_keys[a:input]
+  else
+    return a:input
   endif
 endfunction

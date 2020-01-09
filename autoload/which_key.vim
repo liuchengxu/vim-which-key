@@ -137,10 +137,10 @@ function! s:merge(target, native) " {{{
       endif
 
     " Support add a description to an existing map without dual definition
-    elseif type(v) == s:TYPE.string && k != 'name'
+    elseif type(v) == s:TYPE.string && k !=# 'name'
 
       " <Tab> <C-I>
-      if k == '<Tab>' && has_key(native, '<C-I>')
+      if k ==# '<Tab>' && has_key(native, '<C-I>')
         let target[k] = [
               \ native['<C-I>'][0],
               \ v]
@@ -214,7 +214,7 @@ function! s:getchar() abort
   endif
 
   " Allow <BS> to go back to the upper level.
-  if c == "\<BS>"
+  if c ==# "\<BS>"
     " Top level
     if empty(s:last_runtime_stack)
       call which_key#window#show(s:runtime)
@@ -330,7 +330,7 @@ function! s:execute(cmd) abort
       let Cmd = s:join('call', 'feedkeys("\'.Cmd.'")')
     elseif Cmd =~? '.(*)$' && match(Cmd, '\<call\>') == -1
       let Cmd = s:join('call', Cmd)
-    elseif exists(':'.Cmd)  || Cmd =~ '^:' || Cmd =~? '^call feedkeys(.*)$'
+    elseif exists(':'.Cmd)  || Cmd =~# '^:' || Cmd =~? '^call feedkeys(.*)$'
       let Cmd = Cmd
     else
       let Cmd = s:join('call', 'feedkeys("'.Cmd.'")')
