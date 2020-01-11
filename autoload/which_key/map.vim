@@ -15,6 +15,10 @@ function! which_key#map#parse(key, dict, visual) " {{{
 
   let lines = s:get_raw_key_mapping(key)
 
+  if !has('nvim') && key[0:2] == '<M-'
+      let key = eval('"\' . key . '"')
+  endif
+
   for line in lines
     let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
     if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
@@ -22,9 +26,6 @@ function! which_key#map#parse(key, dict, visual) " {{{
     endif
 
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
-    if !has('nvim') && key[0:2] == '<M-'
-        let key = eval('"\' . key . '"')
-    endif
     let mapd.lhs = substitute(mapd.lhs, key, '', '')
     " FIXME: <Plug>(easymotion-prefix)
     if mapd.lhs ==? '<Space>'
@@ -45,7 +46,11 @@ function! which_key#map#parse(key, dict, visual) " {{{
     if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
       if (visual && match(mapd.mode, '[vx ]') >= 0) ||
             \ (!visual && match(mapd.mode, '[vx]') == -1)
-        let mapd.lhs = which_key#util#string_to_keys(mapd.lhs)
+        if has_key(g:which_key#util#special_keys, mapd.lhs)
+            let mapd.lhs = [g:which_key#util#special_keys[mapd.lhs]]
+        else
+            let mapd.lhs = which_key#util#string_to_keys(mapd.lhs)
+        endif
         call s:add_map_to_dict(mapd, 0, a:dict)
       endif
     endif
