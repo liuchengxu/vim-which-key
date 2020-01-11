@@ -90,44 +90,42 @@ function! s:apply_custom_floating_opts(opts) abort
   return opts
 endfunction
 
-function! s:inject_relative_win_opts(opts) abort
-  let opts = a:opts
-  let opts.win = g:which_key_origin_winid
-  let offset = s:floating_win_col_offset()
-  let opts.col = offset
-  let opts.width = winwidth(g:which_key_origin_winid) - offset
-  let opts.relative = 'win'
-  return opts
-endfunction
-
 function! s:show_floating_win(rows, layout) abort
   let rows = s:append_prompt(a:rows)
 
   if !bufexists(s:bufnr)
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
+
   silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
 
-  let col_offset = strlen(string(line('$'))) + (&signcolumn ==# 'yes' ? 2 : 0)
   let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
 
   let opts = {
-          \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
-          \ 'col': col_offset,
-          \ 'width': &columns - col_offset,
-          \ 'height': a:layout.win_dim + 2,
-          \ 'relative': 'editor',
-          \ }
+        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
+        \ 'height': a:layout.win_dim + 2,
+        \ }
+
+  if !exists('s:origin_lnum_width')
+    let s:origin_lnum_width = strlen(string(line('$')))
+  endif
 
   if g:which_key_floating_relative_win
-    let opts = s:inject_relative_win_opts(opts)
+    let opts.col = s:origin_lnum_width
+    let opts.width = winwidth(g:which_key_origin_winid) - opts.col
+    let opts.win = g:which_key_origin_winid
+    let opts.relative = 'win'
+  else
+    let opts.col = s:origin_lnum_width + (&signcolumn ==# 'yes' ? 2 : 0)
+    let opts.col = s:origin_lnum_width
+    let opts.width = &columns - opts.col
+    let opts.relative = 'editor'
   endif
 
   let opts = s:apply_custom_floating_opts(opts)
 
   if !exists('s:floating_winid')
     silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
-
     call s:hide_cursor()
     call setbufvar(s:bufnr, '&ft', 'which_key')
     call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
@@ -186,6 +184,10 @@ function! s:close_split_win() abort
 endfunction
 
 function! which_key#window#close() abort
+  if exists('s:origin_lnum_width')
+    unlet s:origin_lnum_width
+  endif
+
   if exists('s:floating_winid')
     call nvim_win_close(s:floating_winid, v:true)
     unlet s:floating_winid
