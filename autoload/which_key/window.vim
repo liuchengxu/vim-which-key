@@ -53,7 +53,7 @@ endfunction
 
 function! s:show_popup(rows) abort
   if !exists('s:popup_id')
-    let s:popup_id = popup_create([], {})
+    let s:popup_id = popup_create([], {'highlight': 'WhichKeyFloating'})
     call popup_hide(s:popup_id)
     call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
     call win_execute(s:popup_id, 'setlocal nonumber nowrap')
