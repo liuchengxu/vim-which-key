@@ -91,6 +91,8 @@ endfunction
 let s:chars = map(range(32, 126), 'nr2char(v:val)')
 
 let g:which_key#util#special_keys = {
+      \ "\<Bar>": '<Bar>',
+      \ "\<Bslash>": '<Bslash>',
       \ "\<Up>": '<Up>',
       \ "\<Down>": '<Down>',
       \ "\<Left>": '<Left>',
@@ -104,6 +106,10 @@ let g:which_key#util#special_keys = {
       \ "\<ScrollWheelUp>": '<ScrollWheelUp>',
       \ "\<ScrollWheelDown>": '<ScrollWheelDown>',
       \ "\<C-Space>": '<C-Space>',
+      \ "\<C-Left>": '<C-Left>',
+      \ "\<C-Right>": '<C-Right>',
+      \ "\<S-Left>": '<S-Left>',
+      \ "\<S-Right>": '<S-Right>',
       \ }
 
 for c in s:chars
