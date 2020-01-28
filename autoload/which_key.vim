@@ -191,9 +191,13 @@ function! s:wait_with_timeout(timeout)
 endfunction
 
 function! s:has_children(input) abort
-  let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
-  let group = filter(group, 'v:val == 1')
-  return len(group) > 1
+  " TODO: escape properly, E114: Missing quote: "^\"
+  if a:input ==# '\'
+    let group = map(keys(s:runtime), 'v:val =~# "^\'.a:input.'"')
+  else
+    let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
+  endif
+  return len(filter(group, 'v:val == 1')) > 1
 endfunction
 
 function! s:getchar() abort
