@@ -21,6 +21,7 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   if a:bang
     let s:runtime = a:prefix
+    let s:last_runtime_stack = [copy(s:runtime)]
     call which_key#window#open(s:runtime)
     return
   endif
