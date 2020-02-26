@@ -134,42 +134,42 @@ function! s:show_floating_win(rows, layout) abort
   endif
 endfunction
 
+function! s:show_old_win(rows, layout) abort
+  if s:winnr == -1
+    call s:open_split_win()
+  endif
+
+  let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+  noautocmd execute resize a:layout.win_dim
+  setlocal modifiable
+  " Delete all lines in the buffer
+  " Use black hole register to avoid affecting the normal registers. :h quote_
+  silent 1,$delete _
+  call setline(1, a:rows)
+  setlocal nomodifiable
+endfunction
+
 function! which_key#window#show(runtime) abort
-  let runtime = a:runtime
-
-  let s:name = get(runtime, 'name', '')
-
-  let [layout, rows] = which_key#view#prepare(runtime)
+  let s:name = get(a:runtime, 'name', '')
+  let [layout, rows] = which_key#view#prepare(a:runtime)
 
   if s:use_popup
     call s:show_popup(rows)
   elseif g:which_key_use_floating_win
     call s:show_floating_win(rows, layout)
   else
-    let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-    noautocmd execute resize layout.win_dim
-    setlocal modifiable
-    " Delete all lines in the buffer
-    " Use black hole register to avoid affecting the normal registers. :h quote_
-    silent 1,$delete _
-    call setline(1, rows)
-    setlocal nomodifiable
+    call s:show_old_win(rows, layout)
   endif
 
   call which_key#wait_for_input()
 endfunction
 
-function! which_key#window#open(runtime) abort
+function! s:open_split_win() abort
   let s:pos = [winsaveview(), winnr(), winrestcmd()]
-
-  if !g:which_key_use_floating_win
-    call s:split_or_new()
-    call s:hide_cursor()
-    setlocal filetype=which_key
-    let s:winnr = winnr()
-  endif
-
-  call which_key#window#show(a:runtime)
+  call s:split_or_new()
+  call s:hide_cursor()
+  setlocal filetype=which_key
+  let s:winnr = winnr()
 endfunction
 
 function! s:close_split_win() abort

@@ -1,6 +1,6 @@
 # vim-which-key
 
-<!-- vim-markdown-toc GFM -->
+<!-- TOC GFM -->
 
 * [Introduction](#introduction)
 * [Pros.](#pros)
@@ -12,6 +12,7 @@
 * [Requirement](#requirement)
 * [Usage](#usage)
     * [`timeoutlen`](#timeoutlen)
+    * [Special keys](#special-keys)
     * [Configuration](#configuration)
         * [Miminal Configuration](#miminal-configuration)
         * [Example](#example)
@@ -20,7 +21,7 @@
     * [Options](#options)
 * [Credit](#credit)
 
-<!-- vim-markdown-toc -->
+<!-- /TOC -->
 
 ## Introduction
 
@@ -103,6 +104,10 @@ set timeoutlen=500
 Pressing other keys within `timeoutlen` will either complete the mapping or open a subgroup. In the screenshot above <kbd>SPC</kbd><kbd>b</kbd> will open up the buffer menu.
 
 Please note that no matter which mappings and menus you configure, your original leader mappings will remain unaffected. The key guide is an additional layer. It will only activate, when you do not complete your input during the timeoutlen duration.
+
+### Special keys
+
+- Use <kbd>BS</kbd> to show the upper level mappings.
 
 ### Configuration
 
