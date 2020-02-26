@@ -56,7 +56,7 @@ function! which_key#start(vis, bang, prefix) " {{{
   if !has_key(s:cache, key) || g:which_key_run_map_on_popup
     " First run
     let s:cache[key] = {}
-    call which_key#map#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
+    call which_key#mappings#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
   endif
 
   " s:runtime is a dictionary combining the native key mapping dictionary
@@ -330,6 +330,6 @@ endfunction
 " Update the cache manually by calling this function.
 function! which_key#parse_mappings() " {{{
   for [k, v] in items(s:cache)
-    call which_key#map#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
+    call which_key#mappings#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
   endfor
 endfunction " }}}

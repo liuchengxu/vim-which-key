@@ -9,7 +9,7 @@ function! s:get_raw_key_mapping(key) abort
 endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
-function! which_key#map#parse(key, dict, visual) " {{{
+function! which_key#mappings#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? '<Space>' : a:key
   let visual = a:visual
 

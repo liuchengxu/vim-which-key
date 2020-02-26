@@ -151,7 +151,7 @@ endfunction
 
 function! which_key#window#show(runtime) abort
   let s:name = get(a:runtime, 'name', '')
-  let [layout, rows] = which_key#view#prepare(a:runtime)
+  let [layout, rows] = which_key#renderer#prepare(a:runtime)
 
   if s:use_popup
     call s:show_popup(rows)
