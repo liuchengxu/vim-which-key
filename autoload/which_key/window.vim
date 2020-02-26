@@ -91,13 +91,11 @@ function! s:apply_custom_floating_opts(opts) abort
 endfunction
 
 function! s:show_floating_win(rows, layout) abort
-  let rows = s:append_prompt(a:rows)
-
-  if !bufexists(s:bufnr)
+  if !bufexists(s:bufnr) || !nvim_buf_is_valid(s:bufnr)
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
 
-  silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
+  silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, a:rows)
 
   let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
 
@@ -105,6 +103,8 @@ function! s:show_floating_win(rows, layout) abort
         \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
         \ 'height': a:layout.win_dim + 2,
         \ }
+
+  let opts.height = len(a:rows)
 
   if !exists('s:origin_lnum_width')
     let s:origin_lnum_width = strlen(string(line('$')))
@@ -124,13 +124,13 @@ function! s:show_floating_win(rows, layout) abort
 
   let opts = s:apply_custom_floating_opts(opts)
 
-  if !exists('s:floating_winid')
+  if exists('s:floating_winid') && nvim_win_is_valid(s:floating_winid)
+    call nvim_win_set_config(s:floating_winid, opts)
+  else
     silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
     call s:hide_cursor()
-    call setbufvar(s:bufnr, '&ft', 'which_key')
+    call setbufvar(s:bufnr, '&filetype', 'which_key')
     call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
-  else
-    call nvim_win_set_config(s:floating_winid, opts)
   endif
 endfunction
 
@@ -149,19 +149,89 @@ function! s:show_old_win(rows, layout) abort
   setlocal nomodifiable
 endfunction
 
-function! which_key#window#show(runtime) abort
-  let s:name = get(a:runtime, 'name', '')
-  let [layout, rows] = which_key#renderer#prepare(a:runtime)
+let s:page_size = 10
 
-  if s:use_popup
-    call s:show_popup(rows)
-  elseif g:which_key_use_floating_win
-    call s:show_floating_win(rows, layout)
-  else
-    call s:show_old_win(rows, layout)
+function! s:paginate(rows) abort
+  if len(a:rows) <= s:page_size
+    return a:rows
   endif
 
-  call which_key#wait_for_input()
+  let s:total_rows = a:rows
+  let s:total_pages = len(a:rows) / s:page_size + 1
+  let s:cur_page_number = 1
+
+  let page_rows = a:rows[ : s:cur_page_number * s:page_size]
+  if s:cur_page_number < s:total_pages
+    call add(page_rows, printf('(%d of %d) Next Page: <C-N>, Prev Page: <C-P>', s:cur_page_number, s:total_pages))
+  endif
+
+  return page_rows
+endfunction
+
+function! s:show_page(start, end) abort
+  let page_rows = s:total_rows[a:start : a:end]
+  call add(page_rows, printf('(%d of %d) Next Page: <C-N>, Prev Page: <C-P>', s:cur_page_number, s:total_pages))
+  call s:show(page_rows)
+  call s:wait_for_input()
+endfunction
+
+function! which_key#window#show_next_page() abort
+  if s:cur_page_number == s:total_pages
+    echom "Last page"
+    call s:wait_for_input()
+    return
+  endif
+
+  let start = s:cur_page_number * s:page_size
+  let end = (s:cur_page_number + 1) * s:page_size
+  let s:cur_page_number += 1
+  call s:show_page(start, end)
+endfunction
+
+function! which_key#window#show_prev_page() abort
+  if s:cur_page_number == 1
+    echom "First page"
+    call s:wait_for_input()
+    return
+  endif
+
+  let start = (s:cur_page_number - 2) * s:page_size
+  let end = (s:cur_page_number - 1) * s:page_size
+  echom "start: ".start.", end: ".end
+  let s:cur_page_number -= 1
+  call s:show_page(start, end)
+endfunction
+
+if s:use_popup
+  function! s:show(rows) abort
+    call s:show_popup(a:rows)
+  endfunction
+elseif g:which_key_use_floating_win
+  function! s:show(rows) abort
+    let rows = s:append_prompt(a:rows)
+    call s:show_floating_win(rows, s:layout)
+  endfunction
+else
+  function! s:show(rows) abort
+    call s:show_old_win(a:rows, s:layout)
+  endfunction
+endif
+
+function! s:wait_for_input() abort
+  try
+    call which_key#wait_for_input()
+  catch /^Vim\%((\a\+)\)\=:E132/
+    echom "E132:".v:exception
+    call which_key#wait_for_input()
+  endtry
+endfunction
+
+function! which_key#window#show(runtime) abort
+  let s:name = get(a:runtime, 'name', '')
+  let [s:layout, rows] = which_key#renderer#prepare(a:runtime)
+  let rows = s:paginate(rows)
+  call s:show(rows)
+  call s:wait_for_input()
 endfunction
 
 function! s:open_split_win() abort
@@ -189,7 +259,7 @@ function! which_key#window#close() abort
   endif
 
   if exists('s:floating_winid')
-    call nvim_win_close(s:floating_winid, v:true)
+    silent! call nvim_win_close(s:floating_winid, v:true)
     unlet s:floating_winid
     return
   endif

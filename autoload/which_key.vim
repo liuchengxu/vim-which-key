@@ -204,6 +204,15 @@ function! s:getchar() abort
   if c ==# "\<BS>"
     call s:show_upper_level_mappings()
     return ''
+  elseif c == 14
+    "<C-N>
+    echom "C-N"
+    call which_key#window#show_next_page()
+    return ''
+  elseif c ==# 16
+    "<C-P>
+    call which_key#window#show_prev_page()
+    return ''
   endif
 
   let input .= which_key#util#parse_getchar(c)
@@ -236,7 +245,6 @@ function! which_key#wait_for_input() " {{{
   endif
 
   let s:cur_char = char
-
   call s:handle_input(get(s:runtime, char))
 endfunction
 
