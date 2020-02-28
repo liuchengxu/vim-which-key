@@ -43,7 +43,7 @@ endfunction
 function! s:append_prompt(rows) abort
   let rows = a:rows
   let prompt = which_key#trigger().'- '.which_key#window#name()
-  let rows += ['', prompt]
+  call add(rows, '['.prompt.']')
   return rows
 endfunction
 
@@ -161,16 +161,11 @@ function! s:paginate(rows) abort
   let s:cur_page_number = 1
 
   let page_rows = a:rows[ : s:cur_page_number * s:page_size]
-  if s:cur_page_number < s:total_pages
-    call add(page_rows, printf('(%d of %d) Next Page: <C-N>, Prev Page: <C-P>', s:cur_page_number, s:total_pages))
-  endif
-
   return page_rows
 endfunction
 
 function! s:show_page(start, end) abort
   let page_rows = s:total_rows[a:start : a:end]
-  call add(page_rows, printf('(%d of %d) Next Page: <C-N>, Prev Page: <C-P>', s:cur_page_number, s:total_pages))
   call s:show(page_rows)
   call s:wait_for_input()
 endfunction
@@ -208,8 +203,13 @@ if s:use_popup
   endfunction
 elseif g:which_key_use_floating_win
   function! s:show(rows) abort
-    let rows = s:append_prompt(a:rows)
-    call s:show_floating_win(rows, s:layout)
+    if len(a:rows) <= s:page_size
+      let rows = s:append_prompt(a:rows)
+    elseif s:cur_page_number < s:total_pages
+      let prompt = which_key#trigger().'- '.which_key#window#name()
+      let rows = add(a:rows, printf('[%s] (%d of %d) Next Page: <C-N>, Prev Page: <C-P>', prompt, s:cur_page_number, s:total_pages))
+    endif
+    call s:show_floating_win(a:rows, s:layout)
   endfunction
 else
   function! s:show(rows) abort
@@ -221,7 +221,7 @@ function! s:wait_for_input() abort
   try
     call which_key#wait_for_input()
   catch /^Vim\%((\a\+)\)\=:E132/
-    echom "E132:".v:exception
+    echom "E132:".v:exception.', throwpoint:'.v:throwpoint
     call which_key#wait_for_input()
   endtry
 endfunction
