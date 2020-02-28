@@ -29,7 +29,7 @@ function! s:handle_char_on_start_is_ok(c) abort
     call s:execute_native_fallback()
     return 1
   else
-    call which_key#util#undefined(s:which_key_trigger)
+    call which_key#error#undefined_key(s:which_key_trigger)
     return 1
   endif
 endfunction
@@ -125,7 +125,7 @@ function! s:merge(target, native) " {{{
               \ v]
       else
         let target[k] = [
-              \ has_key(native, k) ? native[k][0] : 'which_key#util#mismatch()',
+              \ has_key(native, k) ? native[k][0] : 'which_key#error#missing_mapping()',
               \ v]
       endif
 
@@ -269,7 +269,7 @@ function! s:handle_input(input) " {{{
     else
       call which_key#window#close()
       redraw!
-      call which_key#util#undefined(s:which_key_trigger)
+      call which_key#error#undefined_key(s:which_key_trigger)
     endif
   endif
 endfunction
@@ -280,9 +280,7 @@ function! s:execute_native_fallback() abort
   try
     execute 'normal! '.l:fallback_cmd
   catch
-    echohl ErrorMsg
-    echom '[which-key] Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd
-    echohl None
+    call which_key#error#report('Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd)
   endtry
 endfunction
 
