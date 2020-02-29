@@ -1,6 +1,15 @@
+scriptencoding utf-8
+
 let s:desc = get(s:, 'desc', {})
 let s:cache = get(s:, 'cache', {})
-let s:TYPE = g:which_key#util#TYPE
+let s:TYPE = {
+      \ 'list':    type([]),
+      \ 'dict':    type({}),
+      \ 'number':  type(0),
+      \ 'string':  type(''),
+      \ 'funcref': type(function('call'))
+      \ }
+let g:which_key#TYPE = s:TYPE
 
 let s:should_note_winid = exists('*win_getid')
 
@@ -206,11 +215,11 @@ function! s:getchar() abort
     return ''
   endif
 
-  let input .= which_key#util#parse_getchar(c)
+  let input .= which_key#char_handler#parse_raw(c)
   if s:has_children(input)
     while 1
-      if !which_key#char_handler#wait_with_timeout(g:which_key_timeout)
-        let input .= which_key#util#parse_getchar(getchar())
+      if !which_key#char_handler#timeout_for_next_char()
+        let input .= which_key#char_handler#parse_raw(getchar())
       else
         break
       endif
@@ -275,7 +284,7 @@ function! s:handle_input(input) " {{{
 endfunction
 
 function! s:execute_native_fallback() abort
-  let l:reg = which_key#util#get_register()
+  let l:reg = s:get_register()
   let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
   try
     execute 'normal! '.l:fallback_cmd
@@ -289,7 +298,7 @@ function! s:join(...) abort
 endfunction
 
 function! s:execute(cmd) abort
-  let reg = which_key#util#get_register()
+  let reg = s:get_register()
   if s:vis.reg.s:count !=# ''
     execute 'normal!' s:vis.reg.s:count
   endif
@@ -315,14 +324,27 @@ function! s:execute(cmd) abort
   endtry
 endfunction
 
-function! which_key#trigger() abort
-  return get(s:, 'which_key_trigger', '')
+" --------------------------------------
+" Misc
+" --------------------------------------
+function! s:register() abort
+  let clipboard = &clipboard
+  if clipboard ==# 'unnamedplus'
+    return '+'
+  elseif clipboard ==# 'unnamed'
+    return '*'
+  else
+    return '"'
+  endif
 endfunction
 
-function! which_key#statusline() abort
-  let key = '%#WhichKeyTrigger# %{get(s:, "which_key_trigger", "")} %*'
-  let name = '%#WhichKeyName# %{which_key#window#name()} %*'
-  return key.name
+function! s:get_register() abort
+ if has('nvim') && !exists('s:reg')
+    let s:reg = ''
+  else
+    let s:reg = v:register != s:register() ? '"'.v:register : ''
+  endif
+  return s:reg
 endfunction
 
 " Update the cache manually by calling this function.
@@ -331,3 +353,26 @@ function! which_key#parse_mappings() " {{{
     call which_key#mappings#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
   endfor
 endfunction " }}}
+
+function! which_key#format(mapping) abort
+  let l:ret = a:mapping
+  let l:ret = substitute(l:ret, '\c<cr>$', '', '')
+  let l:ret = substitute(l:ret, '^:', '', '')
+  let l:ret = substitute(l:ret, '^\c<c-u>', '', '')
+  " let l:ret = substitute(l:ret, '^<Plug>', '', '')
+  return l:ret
+endfunction
+
+function! which_key#statusline() abort
+  let key = '%#WhichKeyTrigger# %{get(s:, "which_key_trigger", "")} %*'
+  let name = '%#WhichKeyName# %{which_key#window#name()} %*'
+  return key.name
+endfunction
+
+function! which_key#trigger() abort
+  return get(s:, 'which_key_trigger', '')
+endfunction
+
+function! which_key#get_sep() abort
+  return get(g:, 'which_key_sep', '→')
+endfunction
