@@ -85,7 +85,7 @@ function! which_key#start(vis, bang, prefix) " {{{
       " When there are next level options, wait another timeoutlen.
       " https://github.com/liuchengxu/vim-which-key/issues/3
       " https://github.com/liuchengxu/vim-which-key/issues/4
-      if which_key#char_handler#wait_with_timeout(g:which_key_timeout)
+      if which_key#char_handler#wait_with_timeout()
         break
       endif
     endwhile
