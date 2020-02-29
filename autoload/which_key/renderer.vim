@@ -1,4 +1,4 @@
-let s:TYPE = g:which_key#util#TYPE
+let s:TYPE = g:which_key#TYPE
 let s:default_displaynames = {
       \ ' ': 'SPC',
       \ '<C-H>': 'BS',

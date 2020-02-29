@@ -271,13 +271,13 @@ when the configuration dictionary has no corrosponding entry.
                                                         *g:WhichKeyFormatFunc*
 
 Type: |Funcref|
-Default: `function('which_key#util#format')`
+Default: `function('which_key#format')`
 
 WhichKeyFormatFunc is a Funcref called on every display item, which could be
 used to hide all trailing <CR> as well as all leading <Plug> substring in the
 guide buffer.
 >
-  let g:WhichKeyFormatFunc = function('which_key#util#format')
+  let g:WhichKeyFormatFunc = function('which_key#format')
 <
 
                                                         *g:which_key_timeout*
@@ -396,7 +396,7 @@ which_key#parse_mappings()                        *which_key#parse_mappings()*
 
   Update the cache manually by calling this function.
 
-which_key#util#format({mapping})                     *which_key#util#format()*
+which_key#format({mapping})                               *which_key#format()*
 
   This function is called on all for every display string in the guide buffer.
   By default |vim-which-key| will hide all trailing <CR> as well as all
