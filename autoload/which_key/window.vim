@@ -59,7 +59,6 @@ function! s:show_popup(rows) abort
     call win_execute(s:popup_id, 'setlocal nonumber nowrap')
   endif
 
-  let rows = s:append_prompt(a:rows)
   let offset = s:floating_win_col_offset()
   if g:which_key_floating_relative_win
     let col = offset + win_screenpos(g:which_key_origin_winid)[1]
@@ -70,11 +69,11 @@ function! s:show_popup(rows) abort
   endif
   call popup_move(s:popup_id, {
           \ 'col': col,
-          \ 'line': &lines - len(rows) - &cmdheight,
+          \ 'line': &lines - len(a:rows) - &cmdheight,
           \ 'maxwidth': maxwidth,
           \ 'minwidth': maxwidth,
           \ })
-  call popup_settext(s:popup_id, rows)
+  call popup_settext(s:popup_id, a:rows)
   call popup_show(s:popup_id)
 endfunction
 
@@ -197,18 +196,24 @@ function! which_key#window#show_prev_page() abort
   call s:show_page(start, end)
 endfunction
 
+function! s:append_extra(rows) abort
+  if len(a:rows) <= s:page_size
+    let rows = s:append_prompt(a:rows)
+  elseif s:cur_page_number < s:total_pages
+    let prompt = which_key#trigger().'- '.which_key#window#name()
+    let rows = add(a:rows, printf('[%s] (%d of %d) Next Page: <C-N>, Prev Page: <C-P>', prompt, s:cur_page_number, s:total_pages))
+  endif
+  return rows
+endfunction
+
 if s:use_popup
   function! s:show(rows) abort
-    call s:show_popup(a:rows)
+    let rows = s:append_extra(a:rows)
+    call s:show_popup(rows)
   endfunction
 elseif g:which_key_use_floating_win
   function! s:show(rows) abort
-    if len(a:rows) <= s:page_size
-      let rows = s:append_prompt(a:rows)
-    elseif s:cur_page_number < s:total_pages
-      let prompt = which_key#trigger().'- '.which_key#window#name()
-      let rows = add(a:rows, printf('[%s] (%d of %d) Next Page: <C-N>, Prev Page: <C-P>', prompt, s:cur_page_number, s:total_pages))
-    endif
+    let rows = s:append_extra(a:rows)
     call s:show_floating_win(a:rows, s:layout)
   endfunction
 else
