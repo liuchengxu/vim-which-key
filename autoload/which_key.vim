@@ -215,7 +215,6 @@ function! s:getchar() abort
     return ''
   elseif c == 14
     "<C-N>
-    echom "C-N"
     call which_key#window#show_next_page()
     return ''
   elseif c ==# 16
