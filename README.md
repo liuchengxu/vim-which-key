@@ -4,6 +4,7 @@
 
 * [Introduction](#introduction)
 * [Pros.](#pros)
+* [Known issue](#known-issue)
 * [Installation](#installation)
     * [Plugin Manager](#plugin-manager)
     * [Package management](#package-management)
@@ -42,6 +43,10 @@ vim-which-key is vim port of [emacs-which-key](https://github.com/justbur/emacs-
 - Instant response for your every single input.
 - Dynamic update on every call.
 - Define group names and arbitrary descriptions.
+
+## Known issue
+
+- 
 
 ## Installation
 

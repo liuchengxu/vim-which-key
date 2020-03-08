@@ -171,7 +171,6 @@ endfunction
 
 function! which_key#window#show_next_page() abort
   if s:cur_page_number == s:total_pages
-    echom "Last page"
     call s:wait_for_input()
     return
   endif
@@ -184,24 +183,29 @@ endfunction
 
 function! which_key#window#show_prev_page() abort
   if s:cur_page_number == 1
-    echom "First page"
     call s:wait_for_input()
     return
   endif
 
   let start = (s:cur_page_number - 2) * s:page_size
   let end = (s:cur_page_number - 1) * s:page_size
-  echom "start: ".start.", end: ".end
   let s:cur_page_number -= 1
   call s:show_page(start, end)
 endfunction
 
+function! s:apply_append_extra(rows) abort
+  let prompt = which_key#trigger().'- '.which_key#window#name()
+  let rows = add(a:rows, printf('%s (%d/%d) [C-N] Next Page [C-P] Prev Page', prompt, s:cur_page_number, s:total_pages))
+  return rows
+endfunction
+
 function! s:append_extra(rows) abort
-  if len(a:rows) <= s:page_size
+  if s:cur_page_number == s:total_pages
+    return s:apply_append_extra(a:rows)
+  elseif len(a:rows) <= s:page_size
     let rows = s:append_prompt(a:rows)
   elseif s:cur_page_number < s:total_pages
-    let prompt = which_key#trigger().'- '.which_key#window#name()
-    let rows = add(a:rows, printf('[%s] (%d of %d) Next Page: <C-N>, Prev Page: <C-P>', prompt, s:cur_page_number, s:total_pages))
+    return s:apply_append_extra(a:rows)
   endif
   return rows
 endfunction
@@ -226,7 +230,7 @@ function! s:wait_for_input() abort
   try
     call which_key#wait_for_input()
   catch /^Vim\%((\a\+)\)\=:E132/
-    echom "E132:".v:exception.', throwpoint:'.v:throwpoint
+    echoerr "E132:".v:exception.', throwpoint:'.v:throwpoint
     call which_key#wait_for_input()
   endtry
 endfunction
