@@ -18,63 +18,15 @@ function! s:hide_cursor() abort
   setlocal t_ve=
 endfunction
 
-function! s:split_or_new() abort
-  let position = g:which_key_position ==? 'topleft' ? 'topleft' : 'botright'
-
-  if g:which_key_use_floating_win
-    let qfbuf = &buftype ==# 'quickfix'
-    let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
-    noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
-    cmapclear <buffer>
-    if qfbuf
-      noautocmd execute bufnr('%').'bwipeout!'
-    endif
-  else
-    let splitcmd = g:which_key_vertical ? '1vnew' : '1new'
-    noautocmd execute 'keepjumps' position splitcmd
-    let s:bufnr = bufnr('%')
-    augroup which_key_leave
-      autocmd!
-      autocmd WinLeave <buffer> call which_key#window#close()
-    augroup END
-  endif
-endfunction
-
 function! s:append_prompt(rows) abort
   let rows = a:rows
   let prompt = which_key#trigger().'- '.which_key#window#name()
-  call add(rows, '['.prompt.']')
+  call add(rows, prompt)
   return rows
 endfunction
 
 function! s:floating_win_col_offset() abort
   return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
-endfunction
-
-function! s:show_popup(rows) abort
-  if !exists('s:popup_id')
-    let s:popup_id = popup_create([], {'highlight': 'WhichKeyFloating'})
-    call popup_hide(s:popup_id)
-    call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
-    call win_execute(s:popup_id, 'setlocal nonumber nowrap')
-  endif
-
-  let offset = s:floating_win_col_offset()
-  if g:which_key_floating_relative_win
-    let col = offset + win_screenpos(g:which_key_origin_winid)[1]
-    let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
-  else
-    let col = offset
-    let maxwidth = &columns - offset - 1
-  endif
-  call popup_move(s:popup_id, {
-          \ 'col': col,
-          \ 'line': &lines - len(a:rows) - &cmdheight,
-          \ 'maxwidth': maxwidth,
-          \ 'minwidth': maxwidth,
-          \ })
-  call popup_settext(s:popup_id, a:rows)
-  call popup_show(s:popup_id)
 endfunction
 
 function! s:apply_custom_floating_opts(opts) abort
@@ -87,65 +39,6 @@ function! s:apply_custom_floating_opts(opts) abort
     endfor
   endif
   return opts
-endfunction
-
-function! s:show_floating_win(rows, layout) abort
-  if !bufexists(s:bufnr) || !nvim_buf_is_valid(s:bufnr)
-    let s:bufnr = nvim_create_buf(v:false, v:false)
-  endif
-
-  silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, a:rows)
-
-  let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
-
-  let opts = {
-        \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
-        \ 'height': a:layout.win_dim + 2,
-        \ }
-
-  let opts.height = len(a:rows)
-
-  if !exists('s:origin_lnum_width')
-    let s:origin_lnum_width = strlen(string(line('$')))
-  endif
-
-  if g:which_key_floating_relative_win
-    let opts.col = s:origin_lnum_width
-    let opts.width = winwidth(g:which_key_origin_winid) - opts.col
-    let opts.win = g:which_key_origin_winid
-    let opts.relative = 'win'
-  else
-    let opts.col = s:origin_lnum_width + (&signcolumn ==# 'yes' ? 2 : 0)
-    let opts.col = s:origin_lnum_width
-    let opts.width = &columns - opts.col
-    let opts.relative = 'editor'
-  endif
-
-  let opts = s:apply_custom_floating_opts(opts)
-
-  if exists('s:floating_winid') && nvim_win_is_valid(s:floating_winid)
-    call nvim_win_set_config(s:floating_winid, opts)
-  else
-    silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
-    call s:hide_cursor()
-    call setbufvar(s:bufnr, '&filetype', 'which_key')
-    call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
-  endif
-endfunction
-
-function! s:show_old_win(rows, layout) abort
-  if s:winnr == -1
-    call s:open_split_win()
-  endif
-
-  let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
-  noautocmd execute resize a:layout.win_dim
-  setlocal modifiable
-  " Delete all lines in the buffer
-  " Use black hole register to avoid affecting the normal registers. :h quote_
-  silent 1,$delete _
-  call setline(1, a:rows)
-  setlocal nomodifiable
 endfunction
 
 let s:page_size = 10
@@ -165,7 +58,7 @@ endfunction
 
 function! s:show_page(start, end) abort
   let page_rows = s:total_rows[a:start : a:end]
-  call s:show(page_rows)
+  call s:show_with_page_info(page_rows)
   call s:wait_for_input()
 endfunction
 
@@ -195,6 +88,7 @@ endfunction
 
 function! s:apply_append_extra(rows) abort
   let prompt = which_key#trigger().'- '.which_key#window#name()
+  " TODO: allow C-N/P configurable?
   let rows = add(a:rows, printf('%s (%d/%d) [C-N] Next Page [C-P] Prev Page', prompt, s:cur_page_number, s:total_pages))
   return rows
 endfunction
@@ -211,19 +105,164 @@ function! s:append_extra(rows) abort
 endfunction
 
 if s:use_popup
-  function! s:show(rows) abort
+
+  function! s:show_popup(rows) abort
+    if !exists('s:popup_id')
+      let s:popup_id = popup_create([], {'highlight': 'WhichKeyFloating'})
+      call popup_hide(s:popup_id)
+      call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
+      call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+    endif
+
+    let offset = s:floating_win_col_offset()
+    if g:which_key_floating_relative_win
+      let col = offset + win_screenpos(g:which_key_origin_winid)[1]
+      let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+    else
+      let col = offset
+      let maxwidth = &columns - offset - 1
+    endif
+    call popup_move(s:popup_id, {
+            \ 'col': col,
+            \ 'line': &lines - len(a:rows) - &cmdheight,
+            \ 'maxwidth': maxwidth,
+            \ 'minwidth': maxwidth,
+            \ })
+    call popup_settext(s:popup_id, a:rows)
+    call popup_show(s:popup_id)
+  endfunction
+
+  function! s:show_with_page_info(rows) abort
     let rows = s:append_extra(a:rows)
     call s:show_popup(rows)
   endfunction
+
+  function! s:show(rows) abort
+    let rows = s:append_prompt(a:rows)
+    call s:show_popup(rows)
+  endfunction
+
 elseif g:which_key_use_floating_win
-  function! s:show(rows) abort
+
+  function! s:show_floating_win(rows) abort
+    if !bufexists(s:bufnr) || !nvim_buf_is_valid(s:bufnr)
+      let s:bufnr = nvim_create_buf(v:false, v:false)
+    endif
+
+    silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, a:rows)
+
+    let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
+
+    let opts = {
+          \ 'row': &lines - nvim_buf_line_count(s:bufnr) - row_offset,
+          \ 'height': len(a:rows),
+          \ }
+
+    if !exists('s:origin_lnum_width')
+      let s:origin_lnum_width = strlen(string(line('$')))
+    endif
+
+    if g:which_key_floating_relative_win
+      let opts.col = s:origin_lnum_width
+      let opts.width = winwidth(g:which_key_origin_winid) - opts.col
+      let opts.win = g:which_key_origin_winid
+      let opts.relative = 'win'
+    else
+      let opts.col = s:origin_lnum_width + (&signcolumn ==# 'yes' ? 2 : 0)
+      let opts.col = s:origin_lnum_width
+      let opts.width = &columns - opts.col
+      let opts.relative = 'editor'
+    endif
+
+    let opts = s:apply_custom_floating_opts(opts)
+
+    if exists('s:floating_winid') && nvim_win_is_valid(s:floating_winid)
+      call nvim_win_set_config(s:floating_winid, opts)
+    else
+      silent let s:floating_winid = nvim_open_win(s:bufnr, v:true, opts)
+      call s:hide_cursor()
+      call setbufvar(s:bufnr, '&filetype', 'which_key')
+      call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
+    endif
+  endfunction
+
+  function! s:show_with_page_info(rows) abort
     let rows = s:append_extra(a:rows)
-    call s:show_floating_win(a:rows, s:layout)
+    call s:show_floating_win(a:rows)
   endfunction
-else
+
   function! s:show(rows) abort
-    call s:show_old_win(a:rows, s:layout)
+    let rows = s:append_prompt(a:rows)
+    call s:show_floating_win(a:rows)
   endfunction
+
+else
+
+  function! s:split_or_new() abort
+    let position = g:which_key_position ==? 'topleft' ? 'topleft' : 'botright'
+
+    if g:which_key_use_floating_win
+      let qfbuf = &buftype ==# 'quickfix'
+      let splitcmd = g:which_key_vertical ? '1vsplit' : '1split'
+      noautocmd execute 'keepjumps' position splitcmd '+buffer'.s:bufnr
+      cmapclear <buffer>
+      if qfbuf
+        noautocmd execute bufnr('%').'bwipeout!'
+      endif
+    else
+      let splitcmd = g:which_key_vertical ? '1vnew' : '1new'
+      noautocmd execute 'keepjumps' position splitcmd
+      let s:bufnr = bufnr('%')
+      augroup which_key_leave
+        autocmd!
+        autocmd WinLeave <buffer> call which_key#window#close()
+      augroup END
+    endif
+  endfunction
+
+  function! s:open_split_win() abort
+    let s:pos = [winsaveview(), winnr(), winrestcmd()]
+    call s:split_or_new()
+    call s:hide_cursor()
+    setlocal filetype=which_key
+    let s:winnr = winnr()
+  endfunction
+
+  function! s:close_split_win() abort
+    noautocmd execute s:winnr.'wincmd w'
+    if winnr() == s:winnr
+      close!
+      execute s:pos[-1]
+      noautocmd execute s:pos[1].'wincmd w'
+      call winrestview(s:pos[0])
+      let s:winnr = -1
+    endif
+  endfunction
+
+  function! s:show_old_win(rows) abort
+    if s:winnr == -1
+      call s:open_split_win()
+    endif
+
+    let resize = g:which_key_vertical ? 'vertical resize' : 'resize'
+    noautocmd execute resize len(a:rows)
+    setlocal modifiable
+    " Delete all lines in the buffer
+    " Use black hole register to avoid affecting the normal registers. :h quote_
+    silent 1,$delete _
+    call setline(1, a:rows)
+    setlocal nomodifiable
+  endfunction
+
+  function! s:show_with_page_info(rows) abort
+    call s:show_old_win(a:rows)
+    " TODO: echo extra
+  endfunction
+
+  function! s:show(rows) abort
+    call s:show_old_win(a:rows)
+  endfunction
+
 endif
 
 function! s:wait_for_input() abort
@@ -237,29 +276,13 @@ endfunction
 
 function! which_key#window#show(runtime) abort
   let s:name = get(a:runtime, 'name', '')
-  let [s:layout, rows] = which_key#renderer#prepare(a:runtime)
-  let rows = s:paginate(rows)
-  call s:show(rows)
-  call s:wait_for_input()
-endfunction
-
-function! s:open_split_win() abort
-  let s:pos = [winsaveview(), winnr(), winrestcmd()]
-  call s:split_or_new()
-  call s:hide_cursor()
-  setlocal filetype=which_key
-  let s:winnr = winnr()
-endfunction
-
-function! s:close_split_win() abort
-  noautocmd execute s:winnr.'wincmd w'
-  if winnr() == s:winnr
-    close!
-    execute s:pos[-1]
-    noautocmd execute s:pos[1].'wincmd w'
-    call winrestview(s:pos[0])
-    let s:winnr = -1
+  let [s:_layout, rows] = which_key#renderer#prepare(a:runtime)
+  if g:which_key_enable_paginate
+    call s:show_with_page_info(s:paginate(rows))
+  else
+    call s:show(rows)
   endif
+  call s:wait_for_input()
 endfunction
 
 function! which_key#window#close() abort
