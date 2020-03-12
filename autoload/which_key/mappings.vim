@@ -1,19 +1,41 @@
-let s:TYPE = g:which_key#util#TYPE
+let s:TYPE = g:which_key#TYPE
 
-function! s:get_raw_key_mapping(key) abort
-  let readmap = ''
-  redir => readmap
-  silent execute 'map' a:key
-  redir END
-  return split(readmap, "\n")
+function! s:string_to_keys(input) abort
+  let input = a:input
+  " Avoid special case: <>
+  if match(input, '<.\+>') != -1
+    let retlist = []
+    let si = 0
+    let go = 1
+    while si < len(input)
+      if go
+        call add(retlist, input[si])
+      else
+        let retlist[-1] .= input[si]
+      endif
+      if input[si] ==? '<'
+        let go = 0
+      elseif input[si] ==? '>'
+        let go = 1
+      end
+      let si += 1
+    endwhile
+    return retlist
+  else
+    return split(input, '\zs')
+  endif
+endfunction " }}}
+
+function! s:get_raw_map_info(key) abort
+  return split(execute('map '.a:key), "\n")
 endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
-function! which_key#map#parse(key, dict, visual) " {{{
+function! which_key#mappings#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? '<Space>' : a:key
   let visual = a:visual
 
-  let lines = s:get_raw_key_mapping(key)
+  let lines = s:get_raw_map_info(key)
 
   for line in lines
     let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
@@ -43,7 +65,7 @@ function! which_key#map#parse(key, dict, visual) " {{{
     if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
       if (visual && match(mapd.mode, '[vx ]') >= 0) ||
             \ (!visual && match(mapd.mode, '[vx]') == -1)
-        let mapd.lhs = which_key#util#string_to_keys(mapd.lhs)
+        let mapd.lhs = s:string_to_keys(mapd.lhs)
         call s:add_map_to_dict(mapd, 0, a:dict)
       endif
     endif
