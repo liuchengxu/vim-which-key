@@ -1,6 +1,15 @@
+scriptencoding utf-8
+
 let s:desc = get(s:, 'desc', {})
 let s:cache = get(s:, 'cache', {})
-let s:TYPE = g:which_key#util#TYPE
+let s:TYPE = {
+      \ 'list':    type([]),
+      \ 'dict':    type({}),
+      \ 'number':  type(0),
+      \ 'string':  type(''),
+      \ 'funcref': type(function('call'))
+      \ }
+let g:which_key#TYPE = s:TYPE
 
 let s:should_note_winid = exists('*win_getid')
 
@@ -8,6 +17,30 @@ function! which_key#register(prefix, dict) abort
   let key = a:prefix ==? '<Space>' ? ' ' : a:prefix
   let val = a:dict
   call extend(s:desc, {key:val})
+endfunction
+
+" No need to open which-key window, execute the acction according to the current input.
+function! s:handle_char_on_start_is_ok(c) abort
+  if which_key#char_handler#is_exit_code(a:c)
+    return 1
+  endif
+  let char = a:c == 9 ? '<Tab>' : nr2char(a:c)
+  let s:which_key_trigger .= ' '.char
+  let next_level = get(s:runtime, char)
+  let ty = type(next_level)
+  if ty == s:TYPE.dict
+    let s:runtime = next_level
+    return 0
+  elseif ty == s:TYPE.list
+    call s:execute(next_level[0])
+    return 1
+  elseif g:which_key_fallback_to_native_key
+    call s:execute_native_fallback()
+    return 1
+  else
+    call which_key#error#undefined_key(s:which_key_trigger)
+    return 1
+  endif
 endfunction
 
 function! which_key#start(vis, bang, prefix) " {{{
@@ -22,7 +55,7 @@ function! which_key#start(vis, bang, prefix) " {{{
   if a:bang
     let s:runtime = a:prefix
     let s:last_runtime_stack = [copy(s:runtime)]
-    call which_key#window#open(s:runtime)
+    call which_key#window#show(s:runtime)
     return
   endif
 
@@ -32,7 +65,7 @@ function! which_key#start(vis, bang, prefix) " {{{
   if !has_key(s:cache, key) || g:which_key_run_map_on_popup
     " First run
     let s:cache[key] = {}
-    call which_key#map#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
+    call which_key#mappings#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
   endif
 
   " s:runtime is a dictionary combining the native key mapping dictionary
@@ -46,66 +79,20 @@ function! which_key#start(vis, bang, prefix) " {{{
       catch /^Vim:Interrupt$/
         return ''
       endtry
-      if s:is_exit_code(c)
-        return ''
-      endif
-      let char = c == 9 ? '<Tab>' : nr2char(c)
-      let s:which_key_trigger .= ' '.char
-      let next_level = get(s:runtime, char)
-      let ty = type(next_level)
-      if ty == s:TYPE.dict
-        let s:runtime = next_level
-      elseif ty == s:TYPE.list
-        call s:execute(next_level[0])
-        return
-      elseif g:which_key_fallback_to_native_key
-        call s:execute_native_fallback()
-        return
-      else
-        call which_key#util#undefined(s:which_key_trigger)
+      if s:handle_char_on_start_is_ok(c)
         return
       endif
-      if s:wait_with_timeout(g:which_key_timeout)
+      " When there are next level options, wait another timeoutlen.
+      " https://github.com/liuchengxu/vim-which-key/issues/3
+      " https://github.com/liuchengxu/vim-which-key/issues/4
+      if which_key#char_handler#wait_with_timeout()
         break
       endif
     endwhile
   endif
 
   let s:last_runtime_stack = [copy(s:runtime)]
-  call which_key#window#open(s:runtime)
-endfunction
-
-" Argument: number
-function! s:is_exit_code(raw_char) abort
-  if !exists('s:exit_code')
-    if exists('g:which_key_exit')
-      let ty = type(g:which_key_exit)
-      if ty == s:TYPE.number || ty == s:TYPE.string
-        let s:exit_code = [g:which_key_exit]
-      elseif ty == s:TYPE.list
-        let s:exit_code = g:which_key_exit
-      else
-        echohl ErrorMsg
-        echom '[which-key] '.a:raw_char.' is invalid for option g:which_key_exit'
-        echohl None
-        return 1
-      endif
-    else
-      " <Esc>, <C-[>: 27
-      let s:exit_code = [27]
-    endif
-  endif
-
-  for e in s:exit_code
-    let ty = type(e)
-    if ty == s:TYPE.number && e == a:raw_char
-      return 1
-    elseif ty == s:TYPE.string && e == nr2char(a:raw_char)
-      return 1
-    endif
-  endfor
-
-  return 0
+  call which_key#window#show(s:runtime)
 endfunction
 
 function! s:create_runtime(key)
@@ -147,7 +134,7 @@ function! s:merge(target, native) " {{{
               \ v]
       else
         let target[k] = [
-              \ has_key(native, k) ? native[k][0] : 'which_key#util#mismatch()',
+              \ has_key(native, k) ? native[k][0] : 'which_key#error#missing_mapping()',
               \ v]
       endif
 
@@ -166,7 +153,7 @@ function! s:merge(target, native) " {{{
   call extend(target, native, 'keep')
 endfunction
 
-function! s:prompt() abort
+function! s:echo_prompt() abort
   echohl Keyword
   echo s:which_key_trigger.'- '
   echohl None
@@ -174,21 +161,6 @@ function! s:prompt() abort
   echohl String
   echon which_key#window#name()
   echohl None
-endfunction
-
-" Returns true if timed out
-function! s:wait_with_timeout(timeout)
-  let timeout = a:timeout
-  while timeout >= 0
-    if getchar(1)
-      return 0
-    endif
-    if timeout > 0
-      sleep 20m
-    endif
-    let timeout -= 20
-  endwhile
-  return 1
 endfunction
 
 function! s:has_children(input) abort
@@ -199,6 +171,25 @@ function! s:has_children(input) abort
     let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
   endif
   return len(filter(group, 'v:val == 1')) > 1
+endfunction
+
+function! s:show_upper_level_mappings() abort
+  " Top level
+  if empty(s:last_runtime_stack)
+    call which_key#window#show(s:runtime)
+    return
+  endif
+
+  let last_runtime = s:last_runtime_stack[-1]
+  let s:runtime = last_runtime
+
+  if len(s:last_runtime_stack) > 1
+    let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
+  endif
+
+  unlet s:last_runtime_stack[-1]
+
+  call which_key#window#show(last_runtime)
 endfunction
 
 function! s:getchar() abort
@@ -212,7 +203,7 @@ function! s:getchar() abort
     return ''
   endtry
 
-  if s:is_exit_code(c)
+  if which_key#char_handler#is_exit_code(c)
     call which_key#window#close()
     redraw!
     return ''
@@ -220,30 +211,15 @@ function! s:getchar() abort
 
   " Allow <BS> to go back to the upper level.
   if c ==# "\<BS>"
-    " Top level
-    if empty(s:last_runtime_stack)
-      call which_key#window#show(s:runtime)
-      return ''
-    endif
-
-    let last_runtime = s:last_runtime_stack[-1]
-    let s:runtime = last_runtime
-
-    if len(s:last_runtime_stack) > 1
-      let s:which_key_trigger = join(split(s:which_key_trigger)[:-2], ' ')
-    endif
-
-    unlet s:last_runtime_stack[-1]
-
-    call which_key#window#show(last_runtime)
+    call s:show_upper_level_mappings()
     return ''
   endif
 
-  let input .= which_key#util#parse_getchar(c)
+  let input .= which_key#char_handler#parse_raw(c)
   if s:has_children(input)
     while 1
-      if !s:wait_with_timeout(g:which_key_timeout)
-        let input .= which_key#util#parse_getchar(getchar())
+      if !which_key#char_handler#timeout_for_next_char()
+        let input .= which_key#char_handler#parse_raw(getchar())
       else
         break
       endif
@@ -260,7 +236,7 @@ function! which_key#wait_for_input() " {{{
   " Append the prompt in the buffer at last when using floating or
   " popup wnidow, otherwise show it in the cmdline.
   if !g:which_key_use_floating_win
-    call s:prompt()
+    call s:echo_prompt()
   endif
 
   let char = s:getchar()
@@ -273,14 +249,18 @@ function! which_key#wait_for_input() " {{{
   call s:handle_input(get(s:runtime, char))
 endfunction
 
+function! s:show_next_level_mappings(next_runtime) abort
+  let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? '<space>' : s:cur_char)
+  call add(s:last_runtime_stack, copy(s:runtime))
+  let s:runtime = a:next_runtime
+  call which_key#window#show(s:runtime)
+endfunction
+
 function! s:handle_input(input) " {{{
   let ty = type(a:input)
 
   if ty ==? s:TYPE.dict
-    let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? '<space>' : s:cur_char)
-    call add(s:last_runtime_stack, copy(s:runtime))
-    let s:runtime = a:input
-    call which_key#window#show(s:runtime)
+    call s:show_next_level_mappings(a:input)
     return
   endif
 
@@ -298,20 +278,18 @@ function! s:handle_input(input) " {{{
     else
       call which_key#window#close()
       redraw!
-      call which_key#util#undefined(s:which_key_trigger)
+      call which_key#error#undefined_key(s:which_key_trigger)
     endif
   endif
 endfunction
 
 function! s:execute_native_fallback() abort
-  let l:reg = which_key#util#get_register()
+  let l:reg = s:get_register()
   let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
   try
     execute 'normal! '.l:fallback_cmd
   catch
-    echohl ErrorMsg
-    echom '[which-key] Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd
-    echohl None
+    call which_key#error#report('Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd)
   endtry
 endfunction
 
@@ -320,7 +298,7 @@ function! s:join(...) abort
 endfunction
 
 function! s:execute(cmd) abort
-  let reg = which_key#util#get_register()
+  let reg = s:get_register()
   if s:vis.reg.s:count !=# ''
     execute 'normal!' s:vis.reg.s:count
   endif
@@ -346,8 +324,43 @@ function! s:execute(cmd) abort
   endtry
 endfunction
 
-function! which_key#trigger() abort
-  return get(s:, 'which_key_trigger', '')
+" --------------------------------------
+" Misc
+" --------------------------------------
+function! s:register() abort
+  let clipboard = &clipboard
+  if clipboard ==# 'unnamedplus'
+    return '+'
+  elseif clipboard ==# 'unnamed'
+    return '*'
+  else
+    return '"'
+  endif
+endfunction
+
+function! s:get_register() abort
+ if has('nvim') && !exists('s:reg')
+    let s:reg = ''
+  else
+    let s:reg = v:register != s:register() ? '"'.v:register : ''
+  endif
+  return s:reg
+endfunction
+
+" Update the cache manually by calling this function.
+function! which_key#parse_mappings() " {{{
+  for [k, v] in items(s:cache)
+    call which_key#mappings#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
+  endfor
+endfunction " }}}
+
+function! which_key#format(mapping) abort
+  let l:ret = a:mapping
+  let l:ret = substitute(l:ret, '\c<cr>$', '', '')
+  let l:ret = substitute(l:ret, '^:', '', '')
+  let l:ret = substitute(l:ret, '^\c<c-u>', '', '')
+  " let l:ret = substitute(l:ret, '^<Plug>', '', '')
+  return l:ret
 endfunction
 
 function! which_key#statusline() abort
@@ -356,9 +369,10 @@ function! which_key#statusline() abort
   return key.name
 endfunction
 
-" Update the cache manually by calling this function.
-function! which_key#parse_mappings() " {{{
-    for [k, v] in items(s:cache)
-      call which_key#map#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
-    endfor
-endfunction " }}}
+function! which_key#trigger() abort
+  return get(s:, 'which_key_trigger', '')
+endfunction
+
+function! which_key#get_sep() abort
+  return get(g:, 'which_key_sep', '→')
+endfunction
