@@ -26,12 +26,8 @@ function! s:string_to_keys(input) abort
   endif
 endfunction " }}}
 
-function! s:get_raw_key_mapping(key) abort
-  let readmap = ''
-  redir => readmap
-  silent execute 'map' a:key
-  redir END
-  return split(readmap, "\n")
+function! s:get_raw_map_info(key) abort
+  return split(execute('map '.a:key), "\n")
 endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
@@ -39,7 +35,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? '<Space>' : a:key
   let visual = a:visual
 
-  let lines = s:get_raw_key_mapping(key)
+  let lines = s:get_raw_map_info(key)
 
   for line in lines
     let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
