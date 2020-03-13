@@ -23,6 +23,7 @@ let g:which_key_fallback_to_native_key = get(g:, 'which_key_fallback_to_native_k
 let g:which_key_default_group_name = get(g:, 'which_key_default_group_name', '+prefix')
 let g:which_key_use_floating_win = (exists('*nvim_open_win') || exists('*popup_create')) && get(g:, 'which_key_use_floating_win', 1)
 let g:which_key_floating_relative_win = get(g:, 'which_key_floating_relative_win', 0)
+let g:which_key_no_default_offset = get(g:, 'which_key_no_default_offset', 0)
 let g:WhichKeyFormatFunc = get(g:, 'WhichKeyFormatFunc', function('which_key#format'))
 
 command! -bang -nargs=1 WhichKey call which_key#start(0, <bang>0, <args>)
