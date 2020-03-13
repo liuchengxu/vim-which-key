@@ -63,10 +63,10 @@ function! s:show_popup(rows) abort
   let offset = s:floating_win_col_offset()
   if g:which_key_floating_relative_win
     let col = offset + win_screenpos(g:which_key_origin_winid)[1]
-    let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+    let maxwidth = winwidth(g:which_key_origin_winid) - offset + 1
   else
     let col = offset
-    let maxwidth = &columns - offset - 1
+    let maxwidth = &columns - offset + 1
   endif
   call popup_move(s:popup_id, {
           \ 'col': col,
