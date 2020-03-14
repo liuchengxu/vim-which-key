@@ -332,7 +332,7 @@ uppercase.
     let g:which_key_display_names = {'<CR>': '↵', '<TAB>': '⇆'}
 <
 
-                                            *g:which_key_no_default_offset*
+                                            *g:which_key_disable_default_offset*
 Type: |Number|
 Default: `0`
 
@@ -340,7 +340,7 @@ The which-key floating window applies an offset according to the width of
 line number and signcolumn of the current window by default. Set this option
 to 1 if you do not want to have this offset.
 >
-    let g:which_key_no_default_offset
+    let g:which_key_disable_default_offset
 <
 
 ==============================================================================

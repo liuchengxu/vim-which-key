@@ -48,7 +48,7 @@ function! s:append_prompt(rows) abort
 endfunction
 
 function! s:floating_win_col_offset() abort
-  if g:which_key_no_default_offset
+  if g:which_key_disable_default_offset
     return 1
   else
     return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
@@ -115,12 +115,12 @@ function! s:show_floating_win(rows, layout) abort
   endif
 
   if g:which_key_floating_relative_win
-    let opts.col = g:which_key_no_default_offset ? 0 : s:origin_lnum_width
+    let opts.col = g:which_key_disable_default_offset ? 0 : s:origin_lnum_width
     let opts.width = winwidth(g:which_key_origin_winid) - opts.col
     let opts.win = g:which_key_origin_winid
     let opts.relative = 'win'
   else
-    let opts.col = g:which_key_no_default_offset ? 0 : s:origin_lnum_width
+    let opts.col = g:which_key_disable_default_offset ? 0 : s:origin_lnum_width
     let opts.width = &columns - opts.col
     let opts.relative = 'editor'
   endif
