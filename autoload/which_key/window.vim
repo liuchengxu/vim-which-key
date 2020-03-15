@@ -162,8 +162,12 @@ elseif g:which_key_use_floating_win
           \ 'height': len(a:rows),
           \ }
 
-    if !exists('s:origin_lnum_width')
-      let s:origin_lnum_width = strlen(string(line('$')))
+    if g:which_key_disable_default_offset
+      let s:origin_lnum_width = 0
+    else
+      if !exists('s:origin_lnum_width')
+        let s:origin_lnum_width = strlen(string(line('$')))
+      endif
     endif
 
     if g:which_key_floating_relative_win
@@ -172,7 +176,6 @@ elseif g:which_key_use_floating_win
       let opts.win = g:which_key_origin_winid
       let opts.relative = 'win'
     else
-      let opts.col = s:origin_lnum_width + (&signcolumn ==# 'yes' ? 2 : 0)
       let opts.col = s:origin_lnum_width
       let opts.width = &columns - opts.col
       let opts.relative = 'editor'
