@@ -26,7 +26,11 @@ function! s:append_prompt(rows) abort
 endfunction
 
 function! s:floating_win_col_offset() abort
-  return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  if g:which_key_disable_default_offset
+    return 1
+  else
+    return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+  endif
 endfunction
 
 function! s:apply_custom_floating_opts(opts) abort
