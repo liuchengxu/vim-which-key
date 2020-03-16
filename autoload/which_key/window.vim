@@ -49,9 +49,9 @@ endfunction
 
 function! s:floating_win_col_offset() abort
   if g:which_key_disable_default_offset
-    return 1
+    return 0
   else
-    return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+    return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0)
   endif
 endfunction
 
@@ -66,11 +66,11 @@ function! s:show_popup(rows) abort
   let rows = s:append_prompt(a:rows)
   let offset = s:floating_win_col_offset()
   if g:which_key_floating_relative_win
-    let col = offset + win_screenpos(g:which_key_origin_winid)[1]
-    let maxwidth = winwidth(g:which_key_origin_winid) - offset - 1
+    let col = offset + win_screenpos(g:which_key_origin_winid)[1] + 1
+    let maxwidth = winwidth(g:which_key_origin_winid) - offset
   else
-    let col = offset
-    let maxwidth = &columns - offset - 1
+    let col = offset + 1
+    let maxwidth = &columns - offset
   endif
   call popup_move(s:popup_id, {
           \ 'col': col,
