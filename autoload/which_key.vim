@@ -279,14 +279,12 @@ function! s:handle_input(input) " {{{
     " Is redraw needed here?
     " redraw!
     call s:execute_native_fallback()
+  elseif g:which_key_ignore_invalid_key
+    call which_key#wait_for_input()
   else
-    if g:which_key_ignore_invalid_key
-      call which_key#wait_for_input()
-    else
-      call which_key#window#close()
-      redraw!
-      call which_key#error#undefined_key(s:which_key_trigger)
-    endif
+    call which_key#window#close()
+    redraw!
+    call which_key#error#undefined_key(s:which_key_trigger)
   endif
 endfunction
 

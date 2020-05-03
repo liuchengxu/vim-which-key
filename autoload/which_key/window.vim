@@ -98,6 +98,9 @@ function! s:apply_append_extra(rows) abort
 endfunction
 
 function! s:append_extra(rows) abort
+  if !exists('s:cur_page_number')
+    return a:rows
+  endif
   if s:cur_page_number == s:total_pages
     return s:apply_append_extra(a:rows)
   elseif len(a:rows) <= s:page_size
