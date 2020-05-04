@@ -194,14 +194,15 @@ function! which_key#window#close() abort
   if exists('s:floating_winid')
     call nvim_win_close(s:floating_winid, v:true)
     unlet s:floating_winid
-    return
-  endif
-
-  if exists('s:popup_id')
+  elseif exists('s:popup_id')
     call popup_close(s:popup_id)
     unlet s:popup_id
   else
     call s:close_split_win()
+  endif
+
+  if exists('*lightline#update')
+    call lightline#update()
   endif
 endfunction
 
