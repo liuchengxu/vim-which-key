@@ -27,9 +27,9 @@ endfunction
 
 function! s:floating_win_col_offset() abort
   if g:which_key_disable_default_offset
-    return 1
+    return 0
   else
-    return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0) + 1
+    return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0)
   endif
 endfunction
 
@@ -303,14 +303,15 @@ function! which_key#window#close() abort
   if exists('s:floating_winid')
     silent! call nvim_win_close(s:floating_winid, v:true)
     unlet s:floating_winid
-    return
-  endif
-
-  if exists('s:popup_id')
+  elseif exists('s:popup_id')
     call popup_close(s:popup_id)
     unlet s:popup_id
   else
     call s:close_split_win()
+  endif
+
+  if exists('*lightline#update')
+    call lightline#update()
   endif
 endfunction
 
