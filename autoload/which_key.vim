@@ -223,6 +223,12 @@ function! s:getchar() abort
     return ''
   endif
 
+  " :h keycode
+  " <CR>, <Enter>
+  if c == 13
+    return '<CR>'
+  endif
+
   let input .= which_key#char_handler#parse_raw(c)
   if s:has_children(input)
     while 1
