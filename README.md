@@ -164,6 +164,14 @@ nnoremap <leader>1 :1wincmd w<CR>
 let g:which_key_map.1 = 'which_key_ignore'
 ```
 
+If you want to hide a group of non-top level mappings, set the `name` to `'which_key_ignore'`. For example,
+
+```vim
+nnoremap <leader>_a :echom '_a'<CR>
+nnoremap <leader>_b :echom '_b'<CR>
+let g:which_key_map['_'] = { 'name': 'which_key_ignore' }
+```
+
 #### Example
 
 You can configure a Dict for each prefix so that the display is more readable.
