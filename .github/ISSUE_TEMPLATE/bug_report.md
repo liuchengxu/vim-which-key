@@ -12,8 +12,11 @@ _Instructions: Replace the template text and remove irrelevant text (including t
 
 **Environment (please complete the following information):**
  - OS: ???
+
  - (Neo)Vim version: ???
+<!-- Output of `git rev-parse --short HEAD` in vim-which-key directory. -->
  - vim-which-key version: ???
+<!-- Without a minimal vimrc, this issue might be closed directly. -->
  - Have you reproduced with a minimal vimrc: ???
 
 **Describe the bug**
@@ -29,6 +32,8 @@ set nocompatible
 set runtimepath^=/path/to/vim-which-key
 syntax on
 filetype plugin indent on
+
+" Here place the configuration that can cause this issue.
 ```
 
 2. Start (neo)vim with command: `vim -u min.vim`
