@@ -60,7 +60,7 @@ function! s:initialize_exit_code() abort
       let s:exit_code = g:which_key_exit
     else
       echohl ErrorMsg
-      echom '[which-key] '.a:raw_char.' is invalid for option g:which_key_exit'
+      echon '[which-key] '.g:which_key_exit.' is invalid for option g:which_key_exit'
       echohl None
       return 1
     endif
@@ -70,12 +70,12 @@ function! s:initialize_exit_code() abort
   endif
 endfunction
 
+if !exists('s:exit_code')
+  call s:initialize_exit_code()
+endif
+
 " Argument: number
 function! which_key#char_handler#is_exit_code(raw_char) abort
-  if !exists('s:exit_code')
-    call s:initialize_exit_code()
-  endif
-
   for e in s:exit_code
     let ty = type(e)
     if ty == s:TYPE.number && e == a:raw_char
