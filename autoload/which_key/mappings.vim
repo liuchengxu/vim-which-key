@@ -37,6 +37,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
 
   let lines = s:get_raw_map_info(key)
 
+  let key_origin = key
   if !has('nvim') && key[0:2] == '<M-'
       let key = eval('"\' . key . '"')
   endif
@@ -68,6 +69,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
       if (visual && match(mapd.mode, '[vx ]') >= 0) ||
             \ (!visual && match(mapd.mode, '[vx]') == -1)
+        let mapd.lhs = substitute(mapd.lhs, key_origin, '', '')
         let mapd.lhs = which_key#char_handler#parse_raw(mapd.lhs)
         let mapd.lhs = s:string_to_keys(mapd.lhs)
         call s:add_map_to_dict(mapd, 0, a:dict)
