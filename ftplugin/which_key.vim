@@ -5,6 +5,7 @@ setlocal
   \ norelativenumber
   \ nolist
   \ nowrap
+  \ nofoldenable
   \ nopaste
   \ nomodeline
   \ noswapfile
