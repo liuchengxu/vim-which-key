@@ -167,6 +167,8 @@ function! s:has_children(input) abort
   " TODO: escape properly, E114: Missing quote: "^\"
   if a:input ==# '\'
     let group = map(keys(s:runtime), 'v:val =~# "^\'.a:input.'"')
+  elseif a:input ==# '"'
+    let group = map(keys(s:runtime), "v:val =~# '^".a:input."'")
   else
     let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
   endif
