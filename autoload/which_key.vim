@@ -98,7 +98,11 @@ endfunction
 function! s:create_runtime(key)
   let key = a:key
   if has_key(s:desc, key)
-    let runtime = deepcopy({s:desc[key]})
+    if type(s:desc[key]) == s:TYPE.dict
+      let runtime = deepcopy(s:desc[key])
+    else
+      let runtime = deepcopy({s:desc[key]})
+    endif
     let native = s:cache[key]
     call s:merge(runtime, native)
   else
