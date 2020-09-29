@@ -92,7 +92,7 @@ function! s:create_rows(layout, mappings) abort
   let rows = []
   let row = 0
   let col = 0
-  let smap = sort(filter(keys(mappings), 'v:val !=# "name"'),'1')
+  let smap = sort(filter(keys(mappings), 'v:val !=# "name"'), 'i')
 
   let displaynames = which_key#renderer#get_displaynames()
   if get(g:, 'which_key_align_by_seperator', 1)
