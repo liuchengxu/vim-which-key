@@ -98,7 +98,11 @@ endfunction
 function! s:create_runtime(key)
   let key = a:key
   if has_key(s:desc, key)
-    let runtime = deepcopy({s:desc[key]})
+    if type(s:desc[key]) == s:TYPE.dict
+      let runtime = deepcopy(s:desc[key])
+    else
+      let runtime = deepcopy({s:desc[key]})
+    endif
     let native = s:cache[key]
     call s:merge(runtime, native)
   else
@@ -167,6 +171,8 @@ function! s:has_children(input) abort
   " TODO: escape properly, E114: Missing quote: "^\"
   if a:input ==# '\'
     let group = map(keys(s:runtime), 'v:val =~# "^\'.a:input.'"')
+  elseif a:input ==# '"'
+    let group = map(keys(s:runtime), "v:val =~# '^".a:input."'")
   else
     let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
   endif

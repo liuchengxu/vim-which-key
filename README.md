@@ -14,7 +14,7 @@
     * [`timeoutlen`](#timeoutlen)
     * [Special keys](#special-keys)
     * [Configuration](#configuration)
-        * [Miminal Configuration](#miminal-configuration)
+        * [Minimal Configuration](#minimal-configuration)
         * [Example](#example)
         * [Hide statusline](#hide-statusline)
     * [Commands](#commands)
@@ -111,7 +111,7 @@ Please note that no matter which mappings and menus you configure, your original
 
 ### Configuration
 
-#### Miminal Configuration
+#### Minimal Configuration
 
 `:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
 
