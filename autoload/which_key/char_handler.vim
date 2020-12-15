@@ -25,18 +25,34 @@ let s:special_keys = {
       \ "\<S-Right>": '<S-Right>',
       \ }
 
-function! s:m_char(char)
-  if a:char ==# '"'
-    return ["<M-\">", "\<M-\">"]
+
+" Generate a key mapping string based on a mode (empty string or one of C/S/M)
+" and a key name.
+function! s:gen_key_mapping(mode,key)
+  let repr = '<'
+  if a:mode != ''
+    let repr = l:repr . a:mode . '-'
   endif
-  let m_char = '<M-' . a:char . '>'
-  let m_char_code = eval('"\' . m_char . '"')
-  return [m_char, m_char_code]
+  if a:key ==# '"'
+    let repr = l:repr . '\'
+  endif
+  let l:repr = l:repr . a:key . '>'
+  let code = eval('"\' . l:repr . '"')
+  return [l:repr, l:code]
 endfunction
 
+" Add M-* key mappings
 for c in s:chars
-  let [key, code] = s:m_char(c)
+  let [key, code] = s:gen_key_mapping('M',c)
   let s:special_keys[code] = key
+endfor
+
+" Add function keys and related combos
+for fk in range(1,37)
+  for p in [ "" , "S" , "C" , "M" ]
+    let [key, code] = s:gen_key_mapping(p, 'F' . fk)
+    let s:special_keys[code] = key
+  endfor
 endfor
 
 function! which_key#char_handler#parse_raw(raw_char)
