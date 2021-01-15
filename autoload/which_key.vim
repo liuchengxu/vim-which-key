@@ -35,7 +35,7 @@ function! s:handle_char_on_start_is_ok(c) abort
     call s:execute(next_level[0])
     return 1
   elseif g:which_key_fallback_to_native_key
-    call s:execute_native_fallback()
+    call s:execute_native_fallback(0)
     return 1
   else
     call which_key#error#undefined_key(s:which_key_trigger)
@@ -283,7 +283,7 @@ function! s:handle_input(input) " {{{
     call which_key#window#close()
     " Is redraw needed here?
     " redraw!
-    call s:execute_native_fallback()
+    call s:execute_native_fallback(1)
   else
     if g:which_key_ignore_invalid_key
       call which_key#wait_for_input()
@@ -295,9 +295,12 @@ function! s:handle_input(input) " {{{
   endif
 endfunction
 
-function! s:execute_native_fallback() abort
+function! s:execute_native_fallback(append) abort
   let l:reg = s:get_register()
-  let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '').get(s:, 'cur_char', '')
+  let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '')
+  if (a:append)
+    let l:fallback_cmd = l:fallback_cmd.get(s:, 'cur_char', '')
+  endif
   try
     execute 'normal! '.l:fallback_cmd
   catch
