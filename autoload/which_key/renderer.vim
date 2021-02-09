@@ -90,6 +90,7 @@ function! s:create_rows(layout, mappings) abort
   let n_rows =  l.n_rows - 1
 
   let rows = []
+  let row_max_size = 0
   let row = 0
   let col = 0
 
@@ -135,9 +136,16 @@ function! s:create_rows(layout, mappings) abort
 
     let crow = get(rows, row, [])
     if empty(crow)
+      call add(crow, "")
       call add(rows, crow)
     endif
-    call add(crow, item.repeat(' ', l.col_width - strdisplaywidth(item)))
+    if col == l.n_cols-1
+      let item = item
+    else
+      let item = item.repeat(' ', l.col_width - strdisplaywidth(item))
+    endif
+    call add(crow, item)
+    let row_max_size = max([row_max_size, strdisplaywidth(join(crow, ""))])
 
     if !g:which_key_sort_horizontal
       if row >= n_rows - 1
@@ -163,6 +171,12 @@ function! s:create_rows(layout, mappings) abort
     "silent execute "cnoremap <nowait> <buffer> ".substitute(k, "|", "<Bar>", ""). " " . s:escape_keys(k) ."<CR>"
   endfor
 
+  " Doesnt work in vertical
+  if g:which_key_centered && !g:which_key_vertical
+    for row in range(len(rows))
+      let rows[row][0] = repeat(" ", (&columns - row_max_size) / 2)
+    endfor
+  endif
   call map(rows, 'join(v:val, "")')
 
   return rows
