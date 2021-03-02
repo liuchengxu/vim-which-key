@@ -343,6 +343,17 @@ to 1 if you do not want to have this offset.
     let g:which_key_disable_default_offset = 1
 <
 
+                                            *g:which_key_centered*
+Type: |Number|
+Default: `1`
+
+Make all of the keybindings appear in the middle instead of the left side of
+the which_key window
+Possible value: `{0, 1}` .
+>
+    let g:which_key_centered = 0
+<
+
 ==============================================================================
 COMMANDS                                              *vim-which-key-commands*
 

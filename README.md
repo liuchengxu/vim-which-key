@@ -295,6 +295,7 @@ Variable               | Default    | Description
 `g:which_key_vertical` | 0          | show popup vertically
 `g:which_key_position` | `botright` | split a window at the bottom
 `g:which_key_hspace`   | 5          | minimum horizontal space between columns
+`g:which_key_centered` | 1          | make all keybindings centered in the middle
 
 ## Credit
 

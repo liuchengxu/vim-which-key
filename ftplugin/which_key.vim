@@ -17,6 +17,7 @@ setlocal
   \ nobuflisted
   \ buftype=nofile
   \ bufhidden=unload
+  \ nospell
 
 let &l:statusline = which_key#statusline()
 
