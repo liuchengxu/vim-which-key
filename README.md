@@ -111,6 +111,9 @@ Please note that no matter which mappings and menus you configure, your original
 
 ### Configuration
 
+- For neovim, [nvim-whichkey-setup.lua](https://github.com/AckslD/nvim-whichkey-setup.lua) provides a wrapper around vim-which-key to simplify configuration in lua.
+  It also solves issues (see #126) when the mapped command is more complex and makes it easy to also map `localleader` and keymaps in visual mode (see #155).
+
 #### Minimal Configuration
 
 `:WhichKey` and `:WhichKeyVisual` are the primary way of interacting with this plugin.
