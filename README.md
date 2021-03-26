@@ -266,6 +266,8 @@ vnoremap <localleader> :<c-u>WhichKeyVisual  ','<CR>
 ```
 
 - Refer to [space-vim](https://github.com/liuchengxu/space-vim/blob/master/core/autoload/spacevim/map/leader.vim) for more detailed example.
+- For neovim [nvim-whichkey-setup.lua](https://github.com/AckslD/nvim-whichkey-setup.lua) provides a wrapper around vim-which-key to simplify configuration in lua.
+  It also solves issues (see #126) when the mapped command is more complex and makes it easy to also map `localleader` and keymaps in visual mode (see #155).
 
 #### Hide statusline
 
