@@ -19,6 +19,8 @@
         * [Hide statusline](#hide-statusline)
     * [Commands](#commands)
     * [Options](#options)
+    * [FAQ](#faq)
+        * [How to map some special keys like `<BS>`?](#how-to-map-some-special-keys-like-bs)
 * [Credit](#credit)
 
 <!-- /TOC -->
@@ -286,19 +288,25 @@ autocmd  FileType which_key set laststatus=0 noshowmode noruler
 
 See more details about commands and options via `:h vim-which-key`.
 
-Command              | Description
-:----                | :----:
-`:WhichKey {prefix}` | Open the guide window for the given prefix
-`:WhichKey! {dict}`  | Open the guide window for a given dictionary directly
+| Command              |                      Description                      |
+| :------------------- | :---------------------------------------------------: |
+| `:WhichKey {prefix}` |      Open the guide window for the given prefix       |
+| `:WhichKey! {dict}`  | Open the guide window for a given dictionary directly |
 
 ### Options
 
-Variable               | Default    | Description
-:----                  | :----:     | :----:
-`g:which_key_vertical` | 0          | show popup vertically
-`g:which_key_position` | `botright` | split a window at the bottom
-`g:which_key_hspace`   | 5          | minimum horizontal space between columns
-`g:which_key_centered` | 1          | make all keybindings centered in the middle
+| Variable               |  Default   |                 Description                 |
+| :--------------------- | :--------: | :-----------------------------------------: |
+| `g:which_key_vertical` |     0      |            show popup vertically            |
+| `g:which_key_position` | `botright` |        split a window at the bottom         |
+| `g:which_key_hspace`   |     5      |  minimum horizontal space between columns   |
+| `g:which_key_centered` |     1      | make all keybindings centered in the middle |
+
+### FAQ
+
+#### How to map some special keys like `<BS>`?
+
+See [#178](https://github.com/liuchengxu/vim-which-key/issues/178).
 
 ## Credit
 
