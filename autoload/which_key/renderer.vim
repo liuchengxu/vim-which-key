@@ -173,10 +173,21 @@ function! s:create_rows(layout, mappings) abort
 
   " Doesnt work in vertical
   if g:which_key_centered && !g:which_key_vertical
+    if !exists('s:center_offset')
+      let sign_column_size = &signcolumn ==# 'yes' ? 2 : 0
+      let line_number_size = &number ? len(string(line('$'))) : 0
+      let s:center_offset = sign_column_size + line_number_size
+    endif
+    let display_cap = g:which_key_floating_relative_win ? winwidth(g:which_key_origin_winid) : &columns
+    let max_display_size = display_cap - s:center_offset
+    let left_padding_size = float2nr(floor((max_display_size - row_max_size) / 2))
+
+    " let left_padding_size = (&columns - row_max_size) / 2
     for row in range(len(rows))
-      let rows[row][0] = repeat(" ", (&columns - row_max_size) / 2)
+      let rows[row][0] = repeat(' ', left_padding_size)
     endfor
   endif
+  echom string(rows)
   call map(rows, 'join(v:val, "")')
 
   return rows
@@ -198,3 +209,23 @@ function! s:escape_keys(inp) abort " {{{
   let l:ret = substitute(l:ret, '|', '<Bar>', '')
   return l:ret
 endfunction " }}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
