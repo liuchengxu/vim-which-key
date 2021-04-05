@@ -173,8 +173,17 @@ function! s:create_rows(layout, mappings) abort
 
   " Doesnt work in vertical
   if g:which_key_centered && !g:which_key_vertical
+    let sign_column_size = &signcolumn ==# 'yes' ? 2 : 0
+    let line_number_size = &number ? len(string(line('$'))) : 0
+    let centered_offset = sign_column_size + line_number_size
+
+    let display_cap = g:which_key_floating_relative_win ? winwidth(g:which_key_origin_winid) : &columns
+    let max_display_size = display_cap - centered_offset
+
+    let left_padding_size = float2nr(floor((max_display_size - row_max_size) / 2))
+
     for row in range(len(rows))
-      let rows[row][0] = repeat(" ", (&columns - row_max_size) / 2)
+      let rows[row][0] = repeat(' ', left_padding_size)
     endfor
   endif
   call map(rows, 'join(v:val, "")')
