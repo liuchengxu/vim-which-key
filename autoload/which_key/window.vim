@@ -101,6 +101,8 @@ function! s:show_floating_win(rows, layout) abort
     let s:bufnr = nvim_create_buf(v:false, v:false)
   endif
 
+  call setbufvar(s:bufnr, '&modifiable', 1)
+
   silent call nvim_buf_set_lines(s:bufnr, 0, -1, 0, rows)
 
   let row_offset = &cmdheight + (&laststatus > 0 ? 1 : 0)
