@@ -354,27 +354,16 @@ Possible value: `{0, 1}` .
     let g:which_key_centered = 0
 <
 
-                                            *g:which_key_group_dicts_together*
-Type: |Number|
-Default: `1`
+                                            *g:which_key_group_dicts*
+Type: |String|
+Default: `end`
 
 Separate key and dictionary bindings, placing all the dictionary items
-according to `g:which_key_group_dicts_at` option. Set this option to `0` if you
-want to sort all which-key items alphabetically in spite of their type.
+accordingly. Set this option to empty string if you want to sort all which-key
+items alphabetically in spite of their type.
+Possible value: `{'', 'start', 'end'}` .
 >
-    let g:which_key_group_dicts_together = 1
-<
-
-                                            *g:which_key_group_dicts_at*
-Type: |Number|
-Default: `1`
-
-Dictates placement of dictionary items if `g:which_key_group_dicts_together`
-option is set. Set this option to `0` if you want to place all the dictionary items
-in the beginning, `1` - to place them in the end.
-Possible value: `{0, 1}` .
->
-    let g:which_key_group_dicts_at = 1
+    let g:which_key_group_dicts = 'end'
 <
 
 ==============================================================================
