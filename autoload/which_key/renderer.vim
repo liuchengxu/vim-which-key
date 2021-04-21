@@ -94,17 +94,30 @@ function! s:create_rows(layout, mappings) abort
   let row = 0
   let col = 0
 
-  let leaf_keys = []
-  let dict_keys = []
-  for key in sort(filter(keys(mappings), 'v:val !=# "name"'), 'i')
-    if type(mappings[key]) == s:TYPE.dict
-      call add(dict_keys, key)
-    else
-      call add(leaf_keys, key)
-    endif
-  endfor
+  " Separate leaves and dict keys depending on which_key_group_dicts_together
+  if get(g:, 'which_key_group_dicts_together', 1)
 
-  let smap = leaf_keys + dict_keys
+    let leaf_keys = []
+    let dict_keys = []
+
+    for key in sort(filter(keys(mappings), 'v:val !=# "name"'), 'i')
+      if type(mappings[key]) == s:TYPE.dict
+        call add(dict_keys, key)
+      else
+        call add(leaf_keys, key)
+      endif
+    endfor
+
+    " Decide what shown first leaves or dicts
+    if get(g:, 'which_key_group_dicts_at', 1)
+      let smap = leaf_keys + dict_keys
+    else
+      let smap = dict_keys + leaf_keys
+    endif
+
+  else
+    let smap = sort(filter(keys(mappings), 'v:val !=# "name"'), 'i')
+  endif
 
   let displaynames = which_key#renderer#get_displaynames()
   if get(g:, 'which_key_align_by_seperator', 1)
