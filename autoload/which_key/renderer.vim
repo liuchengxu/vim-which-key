@@ -95,7 +95,7 @@ function! s:create_rows(layout, mappings) abort
   let col = 0
 
   " Separate leaves and dict keys depending on which_key_group_dicts_together
-	if exists('g:which_key_group_dicts') && g:which_key_group_dicts != ''
+  if exists('g:which_key_group_dicts') && g:which_key_group_dicts != ''
 
     let leaf_keys = []
     let dict_keys = []
@@ -110,10 +110,10 @@ function! s:create_rows(layout, mappings) abort
 
     " Decide what's shown first leaves or dicts
     if g:which_key_group_dicts ==? 'end'
-			let smap = leaf_keys + dict_keys
-		else
-			let smap = dict_keys + leaf_keys
-		endif
+      let smap = leaf_keys + dict_keys
+    else
+      let smap = dict_keys + leaf_keys
+    endif
 
   else
     let smap = sort(filter(keys(mappings), 'v:val !=# "name"'), 'i')
