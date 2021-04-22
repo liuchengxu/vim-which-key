@@ -154,7 +154,7 @@ an ASCII character if your font does not show the default arrow.
 Type: |Number|
 Default: `5`
 
-Set the minimum horizontal space between the displayed colomns.
+Set the minimum horizontal space between the displayed columns.
 >
   let g:which_key_hspace = 5
 <
