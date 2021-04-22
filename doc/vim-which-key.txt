@@ -354,6 +354,18 @@ Possible value: `{0, 1}` .
     let g:which_key_centered = 0
 <
 
+                                            *g:which_key_group_dicts*
+Type: |String|
+Default: `end`
+
+Separate key and dictionary bindings, placing all the dictionary items
+accordingly. Set this option to empty string if you want to sort all which-key
+items alphabetically in spite of their type.
+Possible value: `{'', 'start', 'end'}` .
+>
+    let g:which_key_group_dicts = 'end'
+<
+
 ==============================================================================
 COMMANDS                                              *vim-which-key-commands*
 
