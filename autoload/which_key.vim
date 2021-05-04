@@ -173,6 +173,8 @@ function! s:has_children(input) abort
     let group = map(keys(s:runtime), 'v:val =~# "^\'.a:input.'"')
   elseif a:input ==# '"'
     let group = map(keys(s:runtime), "v:val =~# '^".a:input."'")
+  elseif a:input == '.'
+    let group = map(keys(s:runtime), "v:val =~# '^\\.'")
   else
     let group = map(keys(s:runtime), 'v:val =~# "^'.a:input.'"')
   endif
