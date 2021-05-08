@@ -13,6 +13,12 @@ let g:which_key#TYPE = s:TYPE
 
 let s:should_note_winid = exists('*win_getid')
 
+let s:buffer_cache = {}
+let s:cur_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let g:which_key#extensions = map(
+      \ split(globpath(s:cur_dir.'/which_key/extensions', '*'), '\n'),
+      \ 'fnamemodify(v:val, '':t:r'')')
+
 function! which_key#register(prefix, dict) abort
   let key = a:prefix ==? '<Space>' ? ' ' : a:prefix
   let val = a:dict
@@ -43,6 +49,50 @@ function! s:handle_char_on_start_is_ok(c) abort
   endif
 endfunction
 
+function! which_key#start_buffer(vis, ...) abort
+  let key = '<buffer>'
+  if empty(s:buffer_cache) || g:which_key_run_map_on_popup
+    let s:buffer_cache = {}
+    call which_key#mappings#parse(key, s:buffer_cache, s:vis ==# 'gv' ? 1 : 0)
+  endif
+
+  let native = s:buffer_cache
+
+  try
+    let l:extension_name = s:get_extension_name()
+    let l:ext_config = g:which_key#extensions#{l:extension_name}#config
+  catch /^Vim\%((\a\+)\)\=:E121/
+    echom v:exception
+  endtry
+
+  if exists('b:which_key')
+    let buffer_which_key = copy(b:which_key)
+    if get(b:, 'which_key_no_native', 0)
+      let s:runtime = buffer_which_key
+    else
+      call s:merge(buffer_which_key, native)
+      let s:runtime = buffer_which_key
+    endif
+  else
+
+    if exists('l:ext_config')
+      if !get(l:ext_config, 'no_native', v:false)
+        call s:merge(l:ext_config['mappings'], native)
+      endif
+      let s:runtime = l:ext_config['mappings']
+    else
+      let s:runtime = native
+    endif
+  endif
+
+  call which_key#window#show(s:runtime)
+endfunction
+
+" Some plugins use the filetype name like coc-explorer.
+function! s:get_extension_name() abort
+  return substitute(&filetype, '-', '_', 'g')
+endfunction
+
 function! which_key#start(vis, bang, prefix) " {{{
   let s:vis = a:vis ? 'gv' : ''
   let s:count = v:count != 0 ? v:count : ''
@@ -50,6 +100,13 @@ function! which_key#start(vis, bang, prefix) " {{{
 
   if s:should_note_winid
     let g:which_key_origin_winid = win_getid()
+  endif
+
+  if a:prefix == '<buffer>'
+        \ || exists('b:which_key')
+        \ || index(g:which_key#extensions, s:get_extension_name()) > -1
+    call which_key#start_buffer(a:vis)
+    return
   endif
 
   if a:bang
