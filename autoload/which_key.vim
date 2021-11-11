@@ -304,7 +304,7 @@ function! s:execute_native_fallback(append) abort
     let l:fallback_cmd = l:fallback_cmd.get(s:, 'cur_char', '')
   endif
   try
-    execute 'normal! '.l:fallback_cmd
+    call feedkeys(l:fallback_cmd, 'n')
   catch
     call which_key#error#report('Exception: '.v:exception.' occurs for the fallback mapping: '.l:fallback_cmd)
   endtry
