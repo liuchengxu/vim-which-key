@@ -308,6 +308,10 @@ See more details about commands and options via `:h vim-which-key`.
 
 See [#178](https://github.com/liuchengxu/vim-which-key/issues/178).
 
+#### How to set keybindings on filetype or other condition?
+
+You may use BufEnter/BufLeave [#132](https://github.com/liuchengxu/vim-which-key/issues/132), a `dictionary-function` [#209](https://github.com/liuchengxu/vim-which-key/pull/209), or *[experimental]* setup per buffer [#48](https://github.com/liuchengxu/vim-which-key/pull/48).
+
 ## Credit
 
 - [vim-leader-guide](https://github.com/hecal3/vim-leader-guide)
