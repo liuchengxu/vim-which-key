@@ -115,13 +115,19 @@ function! s:merge(target, native) " {{{
   let target = a:target
   let native = a:native
 
-  for [k, v] in items(target)
+  for [k, V] in items(target)
 
-    if type(v) == s:TYPE.dict && has_key(native, k)
+    " Support a `Dictionary-function` for on-the-fly mappings
+    if type(V) == s:TYPE.funcref
+      " Evaluate the funcref, to allow the result to be processed
+      let target[k] = V()
+    endif
+
+    if type(V) == s:TYPE.dict && has_key(native, k)
 
       if type(native[k]) == s:TYPE.dict
-        if has_key(v, 'name')
-          let native[k].name = v.name
+        if has_key(V, 'name')
+          let native[k].name = V.name
         endif
         call s:merge(target[k], native[k])
       elseif type(native[k]) == s:TYPE.list
@@ -129,17 +135,17 @@ function! s:merge(target, native) " {{{
       endif
 
     " Support add a description to an existing map without dual definition
-    elseif type(v) == s:TYPE.string && k !=# 'name'
+    elseif type(V) == s:TYPE.string && k !=# 'name'
 
       " <Tab> <C-I>
       if k ==# '<Tab>' && has_key(native, '<C-I>')
         let target[k] = [
               \ native['<C-I>'][0],
-              \ v]
+              \ V]
       else
         let target[k] = [
               \ has_key(native, k) ? native[k][0] : 'which_key#error#missing_mapping()',
-              \ v]
+              \ V]
       endif
 
     endif
