@@ -132,6 +132,11 @@ first** (assuming `Space` is your leader key):
   nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
   vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
 <
+It is possible to register a separate description dictionary for normal and visual modes:
+>
+  call which_key#register('<Space>', "g:which_key_map", 'n')
+  call which_key#register('<Space>', "g:which_key_map_visual", 'v')
+<
 It is possible to call the guide for keys other than `leader`:
 >
   nnoremap <localleader> :<c-u>WhichKey  ','<CR>
@@ -406,21 +411,30 @@ COMMANDS                                              *vim-which-key-commands*
 ==============================================================================
 FUNCTIONS                                            *vim-which-key-functions*
 
-which_key#register({prefix}, {dict})                    *which_key#register()*
+which_key#register({prefix}, {dict}[, {mode}])          *which_key#register()*
 
   Provide the guide with a {prefix} and its description dictionary. This
   dictionary {dict} is used to provide convenient names for mappings to
   display in the guide popup. Additionally it is used to provide group names.
+  Optionally a separate description dictionary may be provided for each {mode}.
 
-  Possible value: {prefix}: String, {dict}: String
+  Possible value: {prefix}: String, {dict}: String, {mode}: 'n'|'v'
 
   Example:
 >
-    " register dictionary for the <Space>-prefix
+    " register dictionary for the <Space>-prefix in both normal and visual mode
     call which_key#register(' ', "g:space_prefix_dict")
 
-    " register dictionary for the ,-prefix
+    " register dictionary for the ,-prefix in both modes
     call which_key#register(',', "g:comma_prefix_dict")
+
+    " register dictionary for the <Space>-prefix in both normal and visual mode
+    call which_key#register(' ', "g:space_prefix_dict", 'n')
+    call which_key#register(' ', "g:space_prefix_dict", 'v')
+
+    " register separate dictionaries for the <Space>-prefix for each mode
+    call which_key#register(' ', "g:space_prefix_dict_normal", 'n')
+    call which_key#register(' ', "g:space_prefix_dict_visual", 'v')
 <
 
 which_key#start({vis}, {bang}, {prefix})                   *which_key#start()*

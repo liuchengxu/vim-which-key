@@ -33,7 +33,7 @@ endfunction
 " Parse key-mappings gathered by `:map` and feed them into dict
 function! which_key#mappings#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? '<Space>' : a:key
-  let visual = a:visual
+  let visual = a:visual ==# 'v'
 
   let lines = s:get_raw_map_info(key)
 
@@ -63,8 +63,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     endif
 
     if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
-      if (visual && match(mapd.mode, '[vx ]') >= 0) ||
-            \ (!visual && match(mapd.mode, '[n ]') >= 0)
+      if (match(mapd.mode, visual ? '[vx ]' : '[n ]') >= 0)
         let mapd.lhs = s:string_to_keys(mapd.lhs)
         call s:add_map_to_dict(mapd, 0, a:dict)
       endif
