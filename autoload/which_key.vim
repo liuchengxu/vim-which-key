@@ -1,7 +1,7 @@
 scriptencoding utf-8
 
-let s:desc = get(s:, 'desc', {})
-let s:cache = get(s:, 'cache', {})
+let s:desc = get(s:, 'desc', { 'n': {}, 'v': {} })
+let s:cache = get(s:, 'cache', { 'n': {}, 'v': {} })
 let s:TYPE = {
       \ 'list':    type([]),
       \ 'dict':    type({}),
@@ -13,10 +13,15 @@ let g:which_key#TYPE = s:TYPE
 
 let s:should_note_winid = exists('*win_getid')
 
-function! which_key#register(prefix, dict) abort
+function! which_key#register(prefix, dict, ...) abort
   let key = a:prefix ==? '<Space>' ? ' ' : a:prefix
   let val = a:dict
-  call extend(s:desc, {key:val})
+  if a:0 == 1
+    call extend(s:desc[a:1], {key:val})
+  else
+    call extend(s:desc['n'], {key:val})
+    call extend(s:desc['v'], {key:val})
+  endif
 endfunction
 
 " No need to open which-key window, execute the acction according to the current input.
@@ -45,6 +50,7 @@ endfunction
 
 function! which_key#start(vis, bang, prefix) " {{{
   let s:vis = a:vis ? 'gv' : ''
+  let mode = a:vis ? 'v' : 'n'
   let s:count = v:count != 0 ? v:count : ''
   let s:which_key_trigger = ''
 
@@ -62,15 +68,15 @@ function! which_key#start(vis, bang, prefix) " {{{
   let key = a:prefix
   let s:which_key_trigger = key ==# ' ' ? '<space>' : key
 
-  if !has_key(s:cache, key) || g:which_key_run_map_on_popup
+  if !has_key(s:cache[mode], key) || g:which_key_run_map_on_popup
     " First run
-    let s:cache[key] = {}
-    call which_key#mappings#parse(key, s:cache[key], s:vis ==# 'gv' ? 1 : 0)
+    let s:cache[mode][key] = {}
+    call which_key#mappings#parse(key, s:cache[mode][key], mode)
   endif
 
   " s:runtime is a dictionary combining the native key mapping dictionary
   " parsed by vim-which-key itself with user defined prefix dictionary if avaliable.
-  let s:runtime = s:create_runtime(key)
+  let s:runtime = s:create_runtime(mode, key)
 
   if getchar(1)
     while 1
@@ -95,18 +101,19 @@ function! which_key#start(vis, bang, prefix) " {{{
   call which_key#window#show(s:runtime)
 endfunction
 
-function! s:create_runtime(key)
+function! s:create_runtime(mode, key)
+  let mode = a:mode
   let key = a:key
-  if has_key(s:desc, key)
-    if type(s:desc[key]) == s:TYPE.dict
-      let runtime = deepcopy(s:desc[key])
+  if has_key(s:desc[mode], key)
+    if type(s:desc[mode][key]) == s:TYPE.dict
+      let runtime = deepcopy(s:desc[mode][key])
     else
-      let runtime = deepcopy({s:desc[key]})
+      let runtime = deepcopy({s:desc[mode][key]})
     endif
-    let native = s:cache[key]
+    let native = s:cache[mode][key]
     call s:merge(runtime, native)
   else
-    let runtime = s:cache[key]
+    let runtime = s:cache[mode][key]
   endif
   return runtime
 endfunction
@@ -372,8 +379,10 @@ endfunction
 
 " Update the cache manually by calling this function.
 function! which_key#parse_mappings() " {{{
-  for [k, v] in items(s:cache)
-    call which_key#mappings#parse(k, v, s:vis ==# 'gv' ? 1 : 0)
+  for [km, vm] in items(s:cache)
+    for [k, v] in items(vm)
+      call which_key#mappings#parse(k, v, km)
+    endfor
   endfor
 endfunction " }}}
 

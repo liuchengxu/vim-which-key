@@ -114,7 +114,7 @@ Please note that no matter which mappings and menus you configure, your original
 ### Configuration
 
 - For neovim, [nvim-whichkey-setup.lua](https://github.com/AckslD/nvim-whichkey-setup.lua) provides a wrapper around vim-which-key to simplify configuration in lua.
-  It also solves issues (see #126) when the mapped command is more complex and makes it easy to also map `localleader` and keymaps in visual mode (see #155).
+  It also solves issues (see #126) when the mapped command is more complex and makes it easy to also map `localleader`.
 
 #### Minimal Configuration
 
@@ -184,10 +184,16 @@ You can configure a Dict for each prefix so that the display is more readable.
 To make the guide pop up **Register the description dictionary for the prefix first**. Assuming `Space` is your leader key and the Dict for configuring `Space` is `g:which_key_map`:
 
 ```vim
-call which_key#register('<Space>', "g:which_key_map")
-
 nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
 vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
+
+call which_key#register('<Space>', "g:which_key_map")
+```
+
+The above registers the same description dictionary for both normal and visual modes. To use a separate description dictionary for each mode: add a third argument specifying which mode:
+```vim
+call which_key#register('<Space>', "g:which_key_map", 'n')
+call which_key#register('<Space>', "g:which_key_map_visual", 'v')
 ```
 
 The next step is to add items to `g:which_key_map`:
