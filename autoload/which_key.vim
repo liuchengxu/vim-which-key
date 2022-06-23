@@ -59,37 +59,38 @@ function! which_key#start(vis, bang, prefix) " {{{
   endif
 
   if a:bang
-    let s:runtime = a:prefix
-    let s:last_runtime_stack = [copy(s:runtime)]
-    call which_key#window#show(s:runtime)
-    return
-  endif
+    for kv in keys(a:prefix)
+      call s:cache_key(mode, kv)
+    endfor
+    let s:runtime = deepcopy(a:prefix)
+    call s:merge(s:runtime, s:cache[mode])
+  else
+    let key = a:prefix
+    let s:which_key_trigger = key ==# ' ' ? '<space>' : key
+    call s:cache_key(mode, key)
 
-  let key = a:prefix
-  let s:which_key_trigger = key ==# ' ' ? '<space>' : key
-  call s:cache_key(mode, key)
+    " s:runtime is a dictionary combining the native key mapping dictionary
+    " parsed by vim-which-key itself with user defined prefix dictionary if avaliable.
+    let s:runtime = s:create_runtime(mode, key)
 
-  " s:runtime is a dictionary combining the native key mapping dictionary
-  " parsed by vim-which-key itself with user defined prefix dictionary if avaliable.
-  let s:runtime = s:create_runtime(mode, key)
-
-  if getchar(1)
-    while 1
-      try
-        let c = getchar()
-      catch /^Vim:Interrupt$/
-        return ''
-      endtry
-      if s:handle_char_on_start_is_ok(c)
-        return
-      endif
-      " When there are next level options, wait another timeoutlen.
-      " https://github.com/liuchengxu/vim-which-key/issues/3
-      " https://github.com/liuchengxu/vim-which-key/issues/4
-      if which_key#char_handler#wait_with_timeout()
-        break
-      endif
-    endwhile
+    if getchar(1)
+      while 1
+        try
+          let c = getchar()
+        catch /^Vim:Interrupt$/
+          return ''
+        endtry
+        if s:handle_char_on_start_is_ok(c)
+          return
+        endif
+        " When there are next level options, wait another timeoutlen.
+        " https://github.com/liuchengxu/vim-which-key/issues/3
+        " https://github.com/liuchengxu/vim-which-key/issues/4
+        if which_key#char_handler#wait_with_timeout()
+          break
+        endif
+      endwhile
+    endif
   endif
 
   let s:last_runtime_stack = [copy(s:runtime)]
@@ -378,9 +379,9 @@ endfunction
 
 " Update the cache manually by calling this function.
 function! which_key#parse_mappings() " {{{
-  for [km, vm] in items(s:cache)
-    for [k, v] in items(vm)
-      call which_key#mappings#parse(k, v, km)
+  for [mode, d] in items(s:cache)
+    for k in keys(d)
+      call which_key#mappings#parse(k, d, mode)
     endfor
   endfor
 endfunction " }}}
