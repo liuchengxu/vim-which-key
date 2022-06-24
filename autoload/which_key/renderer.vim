@@ -2,7 +2,6 @@ let s:TYPE = g:which_key#TYPE
 let s:default_displaynames = {
       \ ' ': 'SPC',
       \ '<C-H>': 'BS',
-      \ '<C-I>': 'TAB',
       \ '<TAB>': 'TAB',
       \ }
 
