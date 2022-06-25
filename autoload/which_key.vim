@@ -125,10 +125,10 @@ function! s:merge(target, native) " {{{
   for [k, V] in items(target)
 
     " Support a `Dictionary-function` for on-the-fly mappings
-    if type(V) == s:TYPE.funcref
+    while type(target[k]) == s:TYPE.funcref
       " Evaluate the funcref, to allow the result to be processed
-      let target[k] = V()
-    endif
+      let target[k] = target[k]()
+    endwhile
 
     if type(V) == s:TYPE.dict && has_key(native, k)
 
