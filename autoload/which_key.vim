@@ -14,7 +14,8 @@ let g:which_key#TYPE = s:TYPE
 let s:should_note_winid = exists('*win_getid')
 
 function! which_key#register(prefix, dict, ...) abort
-  let key = a:prefix ==? '<Space>' ? ' ' : a:prefix
+  let key = a:prefix ==? '<Space>' ? ' ' :
+    \ (a:prefix ==? '<C-I>' ? '<Tab>' : a:prefix)
   let val = a:dict
   if a:0 == 1
     call extend(s:desc[a:1], {key:val})
@@ -65,7 +66,8 @@ function! which_key#start(vis, bang, prefix) " {{{
     let s:runtime = deepcopy(a:prefix)
     call s:merge(s:runtime, s:cache[mode])
   else
-    let key = a:prefix
+    let key = a:prefix ==? '<Space>' ? ' ' :
+      \ (a:prefix ==? '<C-I>' ? '<Tab>' : a:prefix)
     let s:which_key_trigger = key ==# ' ' ? '<space>' : key
     call s:cache_key(mode, key)
 
@@ -101,9 +103,6 @@ function! s:cache_key(mode, key)
   let mode = a:mode
   let key = a:key
   if !has_key(s:cache[mode], key) || g:which_key_run_map_on_popup
-    if key !=? '<C-I>'
-      let s:cache[mode][key] = {}
-    endif
     call which_key#mappings#parse(key, s:cache[mode], mode)
   endif
 endfunction
@@ -128,6 +127,7 @@ endfunction
 function! s:merge(target, native) " {{{
   let target = a:target
   let native = a:native
+  " <C-І> is merged into <Tab>, '<Space>' is merged into ' '
   if has_key(target, '<C-I>')
     if has_key(target, '<Tab>')
       call extend(target['<Tab>'], target['<C-I>'], 'keep')
@@ -135,6 +135,14 @@ function! s:merge(target, native) " {{{
       let target['<Tab>'] = target['<C-I>']
     endif
     call remove(target, '<C-I>')
+  endif
+  if has_key(target, '<Space>')
+    if has_key(target, ' ')
+      call extend(target[' '], target['<Space>'], 'keep')
+    else
+      let target[' '] = target['<Space>']
+    endif
+    call remove(target, '<Space>')
   endif
   for [k, V] in items(target)
     " Support a `Dictionary-function` for on-the-fly mappings

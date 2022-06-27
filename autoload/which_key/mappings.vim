@@ -33,6 +33,10 @@ endfunction
 " Parse key-mappings gathered by `:map` and feed them into dict
 function! which_key#mappings#parse(key, dict, visual) " {{{
   let key = a:key ==? ' ' ? '<Space>' : (a:key ==? '<C-I>' ? '<Tab>' : a:key)
+  let dk = a:key ==? '<Space>' ? ' ' : (a:key ==? '<C-I>' ? '<Tab>' : a:key)
+  if !has_key(a:dict, dk)
+    let a:dict[dk] = {}
+  endif
   let visual = a:visual ==# 'v'
 
   let lines = s:get_raw_map_info(key)
@@ -53,10 +57,8 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     if mapd.lhs ==? '<Space>'
       continue
     endif
-
     let mapd.lhs = substitute(mapd.lhs, '<Space>', ' ', 'g')
     let mapd.lhs = substitute(mapd.lhs, '<C-I>', '<Tab>', 'g')
-
     let mapd.rhs = substitute(mapd.rhs, '<SID>', '<SNR>'.mapd['sid'].'_', 'g')
 
     " eval the expression as the final {rhs}
@@ -68,7 +70,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     if mapd.lhs !=# '' && mapd.display !~# 'WhichKey.*'
       if (match(mapd.mode, visual ? '[vx ]' : '[n ]') >= 0)
         let mapd.lhs = s:string_to_keys(mapd.lhs)
-        call s:add_map_to_dict(mapd, 0, a:dict[key])
+        call s:add_map_to_dict(mapd, 0, a:dict[dk])
       endif
     endif
   endfor
