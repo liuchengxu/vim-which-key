@@ -309,9 +309,13 @@ Default: `1`
 
 Ignore the invalid key and let you continue to input the valid ones. Otherwise
 an error message will be popuped and abort the guide buffer.
+                                         *g:which_key_ignore_outside_mappings*
+Type: |Number|
+Default: `0`
 
+Hides all mappings outside of the elements of the description dictionary.
                                                           *'which_key_ignore'*
-If you wish to hide a mapping from the menu set its description to
+If you wish to hide a specific mapping from the menu set its description to
 `'which_key_ignore'`:
 >
     nnoremap <leader>1 :1wincmd w<CR>

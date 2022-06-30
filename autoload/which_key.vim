@@ -175,7 +175,9 @@ function! s:merge(target, native) " {{{
     endif
   endfor
 
-  call extend(target, native, 'keep')
+  if !g:which_key_ignore_outside_mappings
+    call extend(target, native, 'keep')
+  endif
 endfunction
 
 function! s:echo_prompt() abort

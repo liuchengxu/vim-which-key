@@ -177,6 +177,8 @@ nnoremap <leader>_b :echom '_b'<CR>
 let g:which_key_map['_'] = { 'name': 'which_key_ignore' }
 ```
 
+If you want to hide all mappings outside of the elements of the description dictionary, use: `let g:which_key_ignore_outside_mappings = 1`.
+
 #### Example
 
 You can configure a Dict for each prefix so that the display is more readable.
