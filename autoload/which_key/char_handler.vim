@@ -57,8 +57,7 @@ endfor
 
 function! which_key#char_handler#parse_raw(raw_char)
   if type(a:raw_char) == g:which_key#TYPE.number
-    " <Tab>, <C-I> = 9
-    return a:raw_char == 9 ? '<Tab>' : nr2char(a:raw_char)
+    return nr2char(a:raw_char)
   elseif has_key(s:special_keys, a:raw_char)
     " Special characters
     return s:special_keys[a:raw_char]
@@ -70,10 +69,13 @@ endfunction
 function! s:initialize_exit_code() abort
   if exists('g:which_key_exit')
     let ty = type(g:which_key_exit)
-    if ty == s:TYPE.number || ty == s:TYPE.string
+    if ty == s:TYPE.number
+      let s:exit_code = [nr2char(g:which_key_exit)]
+    elseif ty == s:TYPE.string
       let s:exit_code = [g:which_key_exit]
     elseif ty == s:TYPE.list
-      let s:exit_code = g:which_key_exit
+      let s:exit_code = map(g:which_key_exit, {e ->
+        \ type(e) == s:TYPE.number ? nr2char(e) : e})
     else
       echohl ErrorMsg
       echon '[which-key] '.g:which_key_exit.' is invalid for option g:which_key_exit'
@@ -82,7 +84,7 @@ function! s:initialize_exit_code() abort
     endif
   else
     " <Esc>, <C-[>: 27
-    let s:exit_code = [27]
+    let s:exit_code = ["\<Esc>"]
   endif
 endfunction
 
@@ -90,33 +92,23 @@ if !exists('s:exit_code')
   call s:initialize_exit_code()
 endif
 
-" Argument: number
+" Argument: v:t_number or v:t_string as returned by getchar()
 function! which_key#char_handler#is_exit_code(raw_char) abort
-  for e in s:exit_code
-    let ty = type(e)
-    if ty == s:TYPE.number && e == a:raw_char
-      return 1
-    elseif ty == s:TYPE.string && e == nr2char(a:raw_char)
-      return 1
-    endif
-  endfor
-
-  return 0
+  return -1 != index(s:exit_code,
+    \ type(a:raw_char) == s:TYPE.number ? nr2char(a:raw_char) : a:raw_char)
 endfunction
 
 " Returns true if timed out
 function! s:wait_with_timeout(timeout) abort
   let timeout = a:timeout
-  while timeout >= 0
+  while timeout > 0
     if getchar(1)
       return 0
     endif
-    if timeout > 0
-      sleep 20m
-    endif
+    sleep 20m
     let timeout -= 20
   endwhile
-  return 1
+  return !getchar(1)
 endfunction
 
 " Wait timtout to see if there are more input chars.
