@@ -320,6 +320,24 @@ See [#178](https://github.com/liuchengxu/vim-which-key/issues/178).
 
 You may use BufEnter/BufLeave [#132](https://github.com/liuchengxu/vim-which-key/issues/132), a `dictionary-function` [#209](https://github.com/liuchengxu/vim-which-key/pull/209), or *[experimental]* setup per buffer [#48](https://github.com/liuchengxu/vim-which-key/pull/48).
 
+#### How to map lua functions?
+
+This is possible via [nvim-whichkey-setup.lua](https://github.com/AckslD/nvim-whichkey-setup.lua). For example, if one wanted to map [spectre's](https://github.com/windwp/nvim-spectre) `open` to `<leader>S`, which in vimscipt would be `nnoremap <leader>S <cmd>lua require('spectre').open()<CR>`, one could use the following in one's `init.vim`:
+
+```vim
+lua<<EOF
+local wk = require('whichkey_setup')
+
+local keymap = {
+    S = {':lua require("spectre").open()<CR>', 'Search'},
+}
+
+wk.register_keymap('leader', keymap)
+EOF
+```
+
+NB that keymaps can only be registered once. The entirety of one's `vim-which-key` configuration must be ported to [nvim-whichkey-setup.lua](https://github.com/AckslD/nvim-whichkey-setup.lua) in order to enable this functionality.
+
 ## Credit
 
 - [vim-leader-guide](https://github.com/hecal3/vim-leader-guide)
