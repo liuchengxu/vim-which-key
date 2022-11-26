@@ -436,3 +436,23 @@ endfunction
 function! which_key#get_sep() abort
   return get(g:, 'which_key_sep', '→')
 endfunction
+
+" Add the dictionary to the specified key if nothing currently mapped,
+" otherwise add to the dict already mapped, adding /new_name onto the name.
+" E.g. one file could map '+Terminal' on the t key, and then another file
+" or plugin could use the same t for tab control, and if both files are loaded
+" you get +Terminal/Tab with both mappings. If items overlap, the second
+" loaded overrides the first.
+function! which_key#add_or_update(key, dictionary) abort
+  if has_key(g:which_key_map, a:key)
+    let prior_name = g:which_key_map[a:key]['name']
+    let new_name = l:prior_name . '/' . a:dictionary['name'][1:]
+    for [new_key, new_value] in items(a:dictionary)
+      let g:which_key_map[a:key][new_key] = new_value
+    endfor
+    let g:which_key_map[a:key]['name'] = l:new_name
+  else
+    let g:which_key_map[a:key] = a:dictionary
+  endif
+  call which_key#register('<Space>', 'g:which_key_map')
+endfunction
