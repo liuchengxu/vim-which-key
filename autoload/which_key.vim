@@ -375,7 +375,9 @@ function! s:execute(cmd) abort
     elseif Cmd =~? '.(*)$' && match(Cmd, '\<call\>') == -1
       let Cmd = s:join('call', Cmd)
     elseif exists(':'.Cmd)  || Cmd =~# '^:' || Cmd =~? '^call feedkeys(.*)$'
-      let Cmd = Cmd
+      if !empty(s:vis)
+        let Cmd = line('v').','.line('.').Cmd
+      endif
     else
       let Cmd = s:join('call', 'feedkeys("'.Cmd.'")')
     endif
