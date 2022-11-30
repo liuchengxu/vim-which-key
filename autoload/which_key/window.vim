@@ -57,10 +57,19 @@ endfunction
 
 function! s:show_popup(rows) abort
   if !exists('s:popup_id')
-    let s:popup_id = popup_create([], {'highlight': 'WhichKeyFloating'})
+    let opts = {
+      \ 'highlight': 'WhichKeyFloating',
+      \ }
+    let opts = s:apply_custom_floating_opts(opts)
+    let s:popup_id = popup_create([], opts)
     call popup_hide(s:popup_id)
     call setbufvar(winbufnr(s:popup_id), '&filetype', 'which_key')
     call win_execute(s:popup_id, 'setlocal nonumber nowrap')
+    if exists('g:which_key_floating_vars')
+      for [key, val] in items(g:which_key_floating_vars)
+        call setwinvar(s:popup_id, key, val)
+      endfor
+    endif
   endif
 
   let rows = s:append_prompt(a:rows)
@@ -89,6 +98,11 @@ function! s:apply_custom_floating_opts(opts) abort
       if has_key(opts, key)
         let opts[key] = opts[key] + eval('0'.val)
       endif
+    endfor
+  endif
+  if exists('g:which_key_floating_opts_explicit')
+    for [key, val] in items(g:which_key_floating_opts_explicit)
+      let opts[key] = val
     endfor
   endif
   return opts
@@ -135,6 +149,11 @@ function! s:show_floating_win(rows, layout) abort
     call s:hide_cursor()
     call setbufvar(s:bufnr, '&ft', 'which_key')
     call setwinvar(s:floating_winid, '&winhl', 'Normal:WhichKeyFloating')
+    if exists('g:which_key_floating_vars')
+      for [key, val] in items(g:which_key_floating_vars)
+        call setwinvar(s:floating_winid, key, val)
+      endfor
+    endif
   else
     call nvim_win_set_config(s:floating_winid, opts)
   endif
