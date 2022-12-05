@@ -57,13 +57,15 @@ function! s:handle_char_on_start_is_ok(c) abort
   if has_key(s:KEYCODES, char)
     let char = s:KEYCODES[char]
   endif
-  let s:which_key_trigger .= ' '.char
+  let s:which_key_trigger .= ' '.(char ==# ' ' ? '<Space>' : char)
   let next_level = get(s:runtime, char)
   let ty = type(next_level)
   if ty == s:TYPE.dict
     let s:runtime = next_level
     return 0
-  elseif ty == s:TYPE.list
+  elseif ty == s:TYPE.list && (!g:which_key_fallback_to_native_key ||
+    \ g:which_key_fallback_to_native_key &&
+    \ next_level[0] !=# 'which_key#error#missing_mapping()')
     call s:execute(next_level[0])
     return 1
   elseif g:which_key_fallback_to_native_key
@@ -100,7 +102,7 @@ function! which_key#start(vis, bang, prefix) " {{{
       let prefix = s:MERGE_INTO[prefix]
     endif
     let key = prefix
-    let s:which_key_trigger = key ==# ' ' ? '<space>' : key
+    let s:which_key_trigger = key ==# ' ' ? '<Space>' : key
     call s:cache_key(mode, key)
 
     " s:runtime is a dictionary combining the native key mapping dictionary
@@ -280,7 +282,6 @@ function! s:getchar() abort
       endif
     endwhile
   endif
-
   return input
 endfunction
 
@@ -305,7 +306,7 @@ function! which_key#wait_for_input() " {{{
 endfunction
 
 function! s:show_next_level_mappings(next_runtime) abort
-  let s:which_key_trigger .= ' '. (s:cur_char ==# ' ' ? '<space>' : s:cur_char)
+  let s:which_key_trigger .= ' '.(s:cur_char ==# ' ' ? '<Space>' : s:cur_char)
   call add(s:last_runtime_stack, copy(s:runtime))
   let s:runtime = a:next_runtime
   call which_key#window#show(s:runtime)
@@ -319,7 +320,9 @@ function! s:handle_input(input) " {{{
     return
   endif
 
-  if ty == s:TYPE.list
+  if ty == s:TYPE.list && (!g:which_key_fallback_to_native_key ||
+    \ g:which_key_fallback_to_native_key &&
+    \ a:input[0] !=# 'which_key#error#missing_mapping()')
     call which_key#window#close()
     call s:execute(a:input[0])
   elseif g:which_key_fallback_to_native_key
@@ -340,7 +343,7 @@ endfunction
 
 function! s:execute_native_fallback(append) abort
   let l:reg = s:get_register()
-  let l:fallback_cmd = s:vis.l:reg.s:count.substitute(s:which_key_trigger, ' ', '', '')
+  let l:fallback_cmd = s:vis.l:reg.s:count.substitute(substitute(s:which_key_trigger, ' ', '', 'g'), '<Space>', ' ', 'g')
   if (a:append)
     let l:fallback_cmd = l:fallback_cmd.get(s:, 'cur_char', '')
   endif

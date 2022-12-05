@@ -309,6 +309,8 @@ Default: `1`
 
 Ignore the invalid key and let you continue to input the valid ones. Otherwise
 an error message will be popuped and abort the guide buffer.
+Only applicable if |g:which_key_fallback_to_native_key| is 0, otherwise this
+setting is ignored.
                                          *g:which_key_ignore_outside_mappings*
 Type: |Number|
 Default: `0`
