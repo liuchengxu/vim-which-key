@@ -30,7 +30,6 @@ let s:MERGE_INTO = {
       \ '<Bslash>': '\',
       \ '<Bar>': '|'
       \ }
-let s:REQUIRES_REGEX_ESCAPE = ['$', '*', '~', '.']
 
 let g:which_key#TYPE = s:TYPE
 
@@ -215,15 +214,6 @@ function! s:echo_prompt() abort
   echohl None
 endfunction
 
-function! s:has_children(input) abort
-  if index(s:REQUIRES_REGEX_ESCAPE, a:input) != -1
-    let group = map(keys(s:runtime), {_,v -> v =~# '^\'.a:input})
-  else
-    let group = map(keys(s:runtime), {_,v -> v =~# '^'.a:input})
-  endif
-  return len(filter(group, 'v:val == 1')) > 1
-endfunction
-
 function! s:show_upper_level_mappings() abort
   " Top level
   if empty(s:last_runtime_stack)
@@ -244,7 +234,6 @@ function! s:show_upper_level_mappings() abort
 endfunction
 
 function! s:getchar() abort
-  let input = ''
   try
     let c = getchar()
   " Handle <C-C>
@@ -272,17 +261,14 @@ function! s:getchar() abort
     return '<CR>'
   endif
 
-  let input .= which_key#char_handler#parse_raw(c)
-  if s:has_children(input)
-    while 1
-      if !which_key#char_handler#timeout_for_next_char()
-        let input .= which_key#char_handler#parse_raw(getchar())
-      else
-        break
-      endif
-    endwhile
+  let c = which_key#char_handler#parse_raw(c)
+  if has_key(s:KEYCODES, c)
+    let c = s:KEYCODES[c]
   endif
-  return input
+  if has_key(s:MERGE_INTO, c)
+    let c = s:MERGE_INTO[c]
+  endif
+  return c
 endfunction
 
 function! which_key#wait_for_input() " {{{
