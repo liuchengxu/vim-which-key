@@ -45,6 +45,12 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
   endif
 
   for line in lines
+    " filter out lines like: n  <Space>ca   *@<Lua 129: /opt/homebrew/Cellar/neovim/0.9.0/share/nvim/runtime/lua/vim/lsp/buf.lua:758>
+    " we're not going to get anything useful to display from the rhs of these anyway
+    if line =~? '<Lua '
+      continue
+    endif
+
     let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
     if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
       continue
