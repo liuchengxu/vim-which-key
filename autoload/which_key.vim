@@ -219,11 +219,21 @@ endfunction
 
 function! s:has_children(input) abort
   if index(s:REQUIRES_REGEX_ESCAPE, a:input) != -1
-    let group = map(keys(s:runtime), {_,v -> v =~# '^\'.a:input})
+    let regex = '^\'.a:input
   else
-    let group = map(keys(s:runtime), {_,v -> v =~# '^'.a:input})
+    let regex = '^'.a:input
   endif
-  return len(filter(group, 'v:val == 1')) > 1
+  let group = []
+  let cnt = 0
+  for each in keys(s:runtime)
+    if each =~# regex
+      let cnt += 1
+      if cnt > 1
+        return 1
+      endif
+    endif
+  endfor
+  return 0
 endfunction
 
 function! s:show_upper_level_mappings() abort

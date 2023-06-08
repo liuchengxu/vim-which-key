@@ -26,8 +26,17 @@ function! s:string_to_keys(input) abort
   endif
 endfunction " }}}
 
+function! s:execute(cmd)
+  let cmd = a:cmd
+  redir => l:output
+  silent! execute cmd
+  redir END
+  return l:output
+endfunction
+
+
 function! s:get_raw_map_info(key) abort
-  return split(execute('map '.a:key), "\n")
+  return split(s:execute('map '.a:key), "\n")
 endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
@@ -73,7 +82,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     endif
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
     let mapd.lhs = substitute(mapd.lhs, key, '', '')
-    " FIXME: <Plug>(easymotion-prefix)
+    " NOTE:  <Plug>(easymotion-prefix)
     if mapd.lhs ==? '<Space>'
       continue
     endif

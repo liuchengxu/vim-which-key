@@ -50,8 +50,10 @@ endfunction
 function! s:floating_win_col_offset() abort
   if g:which_key_disable_default_offset
     return 0
-  else
+  elseif exists('&signcolumn')
     return (&number ? strlen(line('$')) : 0) + (&signcolumn ==# 'yes' ? 2: 0)
+  else
+    return 0
   endif
 endfunction
 
