@@ -44,20 +44,34 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     call extend(lines, s:get_raw_map_info('<C-I>'))
   endif
 
-  for line in lines
-    " filter out lines like: n  <Space>ca   *@<Lua 129: /opt/homebrew/Cellar/neovim/0.9.0/share/nvim/runtime/lua/vim/lsp/buf.lua:758>
-    " we're not going to get anything useful to display from the rhs of these anyway
-    if line =~? '<Lua '
-      continue
-    endif
+  if !has('nvim') && key[0:2] == '<M-' && !has('patch-8.2.0815')
+    let key = eval('"\' . key . '"')
+  endif
 
-    let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
+  for line in lines
+    let sp = split(line[3:])
+    let mapd = maparg(sp[0], line[0], 0, 1)
     if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
       continue
     endif
-
+    if has_key(mapd, 'desc')
+      let mapd.rhs = mapd.desc
+      unlet mapd.desc
+    elseif has_key(mapd, 'callback')
+      unlet mapd.callback
+      try
+        let sp = split(split(maparg(sp[0], line[0])[:-2])[-1], ":")
+        let fl = sp[0]
+        let ln = str2nr(sp[-1]) - 1
+        let rhs = trim(readfile(fl)[ln])
+        let rhs = split(rhs, "M")[1]
+        let rhs = split(rhs, "(")[0]
+        let mapd.rhs = "<Cmd>lua " . api . rhs . "()<Cr>"
+      catch /.*/
+        let mapd.rhs = "lua function not show"
+      endtry
+    endif
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
-
     let mapd.lhs = substitute(mapd.lhs, key, '', '')
     " FIXME: <Plug>(easymotion-prefix)
     if mapd.lhs ==? '<Space>'

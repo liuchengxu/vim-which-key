@@ -56,6 +56,8 @@ function! s:handle_char_on_start_is_ok(c) abort
   let char = type(a:c) == s:TYPE.number ? nr2char(a:c) : a:c
   if has_key(s:KEYCODES, char)
     let char = s:KEYCODES[char]
+  else
+    let char = which_key#char_handler#parse_raw(char)
   endif
   let s:which_key_trigger .= ' '.(char ==# ' ' ? '<Space>' : char)
   let next_level = get(s:runtime, char)
