@@ -56,6 +56,8 @@ function! s:handle_char_on_start_is_ok(c) abort
   let char = type(a:c) == s:TYPE.number ? nr2char(a:c) : a:c
   if has_key(s:KEYCODES, char)
     let char = s:KEYCODES[char]
+  else
+    let char = which_key#char_handler#parse_raw(char)
   endif
   let s:which_key_trigger .= ' '.(char ==# ' ' ? '<Space>' : char)
   let next_level = get(s:runtime, char)
@@ -216,12 +218,21 @@ function! s:echo_prompt() abort
 endfunction
 
 function! s:has_children(input) abort
+  let cnt = 0
   if index(s:REQUIRES_REGEX_ESCAPE, a:input) != -1
-    let group = map(keys(s:runtime), {_,v -> v =~# '^\'.a:input})
+    let regex = '^\'.a:input
   else
-    let group = map(keys(s:runtime), {_,v -> v =~# '^'.a:input})
+    let regex = '^'.a:input
   endif
-  return len(filter(group, 'v:val == 1')) > 1
+  for each in keys(s:runtime)
+    if each =~# regex
+      let cnt += 1
+      if cnt > 1
+        return 1
+      endif
+    endif
+  endfor
+  return 0
 endfunction
 
 function! s:show_upper_level_mappings() abort
