@@ -73,7 +73,7 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
       try
         let sp = split(split(maparg(raw_sp[0], line[0])[:-2])[-1], ":")
         " NOTE: fl is nvim runtime script
-        let fl = sp[0]
+        let fl = expand(sp[0])
         " NOTE: ln is the line where lua function exists
         let ln = str2nr(sp[-1]) - 1
         let rhs = trim(readfile(fl)[ln])
