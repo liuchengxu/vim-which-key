@@ -58,8 +58,6 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     let key = eval('"\' . key . '"')
   endif
   for line in lines
-    " filter out lines like: n  <Space>ca   *@<Lua 129: /opt/homebrew/Cellar/neovim/0.9.0/share/nvim/runtime/lua/vim/lsp/buf.lua:758>
-    " we're not going to get anything useful to display from the rhs of these anyway
     let raw_sp = split(line[3:])
     let mapd = maparg(raw_sp[0], line[0], 0, 1)
     if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
@@ -68,13 +66,15 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     if has_key(mapd, 'desc')
       let mapd.rhs = mapd.desc
       unlet mapd.desc
+    " NOTE: nvim's built-in lua function has `callback` key, it must be deleted.
+    " and mapd.rhs must be re-built. Acctually, nvim's runtime script contain the function,
+    " fl below is nvim runtime script, ln is the line where the lua function exists,
+    " so we can parse the built-in lua function, maybe it is not a beautiful resolution but workable.
     elseif has_key(mapd, 'callback')
       unlet mapd.callback
       try
         let sp = split(split(maparg(raw_sp[0], line[0])[:-2])[-1], ":")
-        " NOTE: fl is nvim runtime script
         let fl = expand(sp[0])
-        " NOTE: ln is the line where lua function exists
         let ln = str2nr(sp[-1]) - 1
         let rhs = trim(readfile(fl)[ln])
         let rhs = split(rhs, 'M.')[1]
