@@ -60,15 +60,35 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     let key = eval('"\' . key . '"')
   endif
   for line in lines
-    " filter out lines like: n  <Space>ca   *@<Lua 129: /opt/homebrew/Cellar/neovim/0.9.0/share/nvim/runtime/lua/vim/lsp/buf.lua:758>
-    " we're not going to get anything useful to display from the rhs of these anyway
-    if line =~? '<Lua '
-      continue
-    endif
-
-    let mapd = maparg(split(line[3:])[0], line[0], 0, 1)
+    let raw_sp = split(line[3:])
+    let mapd = maparg(raw_sp[0], line[0], 0, 1)
     if empty(mapd) || mapd.lhs =~? '<Plug>.*' || mapd.lhs =~? '<SNR>.*'
       continue
+    endif
+    if has_key(mapd, 'desc')
+      let mapd.rhs = mapd.desc
+      unlet mapd.desc
+    " NOTE: nvim's built-in lua functions have `callback` key in mapd, it must be deleted.
+    " Acctually, nvim's runtime script contain these functions, mapd.rhs could be rebuilt
+    " so the built-in lua function could be parsed, maybe it is not a beautiful resolution but workable.
+    elseif has_key(mapd, 'callback')
+      unlet mapd.callback
+      try
+        let sp = split(split(maparg(raw_sp[0], line[0])[:-2])[-1], ":")
+        " `fl` is nvim runtime script
+        let fl = expand(sp[0])
+        " `ln` is the line where the lua function layed,
+        let ln = str2nr(sp[-1]) - 1
+        let rhs = trim(readfile(fl)[ln])
+        let rhs = split(rhs, 'M.')[1]
+        " create api from file name
+        let api = split(substitute(fl, "\\", "/", 'g'), 'runtime/lua/')[1]
+        let api = substitute(api, 'lua$', '', 'g')
+        let api = substitute(api, '/', '.', 'g')
+        let mapd.rhs = "<Cmd>lua " . api . rhs . '<Cr>'
+      catch /.*/
+        let mapd.rhs = "lua function not show"
+      endtry
     endif
 
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
