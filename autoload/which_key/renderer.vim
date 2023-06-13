@@ -185,7 +185,7 @@ function! s:create_rows(layout, mappings) abort
 
   " Doesnt work in vertical
   if g:which_key_centered && !g:which_key_vertical
-    let sign_column_size = &signcolumn ==# 'yes' ? 2 : 0
+    let sign_column_size = exists('&signcolumn') && &signcolumn ==# 'yes' ? 2 : 0
     let line_number_size = &number ? len(string(line('$'))) : 0
     let centered_offset = sign_column_size + line_number_size
 

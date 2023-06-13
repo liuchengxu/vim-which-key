@@ -26,8 +26,19 @@ function! s:string_to_keys(input) abort
   endif
 endfunction " }}}
 
+function! s:execute(cmd)
+  if exists("*execute")
+    return execute(a:cmd)
+  else
+    redir => l:output
+    silent! execute a:cmd
+    redir END
+    return l:output
+  endif
+endfunction
+
 function! s:get_raw_map_info(key) abort
-  return split(execute('map '.a:key), "\n")
+  return split(s:execute('map '.a:key), "\n")
 endfunction
 
 " Parse key-mappings gathered by `:map` and feed them into dict
@@ -43,7 +54,11 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
   if key ==# '<Tab>'
     call extend(lines, s:get_raw_map_info('<C-I>'))
   endif
-
+  " In vim older than vim8.2.0815, Alt key as `<M->` togethr with English alphabet raise mapd.lhs
+  " only contain eval() value, not '<M->'
+  if !has('nvim') && key[0:2] ==# '<M-' && !has('patch-8.2.0815')
+    let key = eval('"\' . key . '"')
+  endif
   for line in lines
     " filter out lines like: n  <Space>ca   *@<Lua 129: /opt/homebrew/Cellar/neovim/0.9.0/share/nvim/runtime/lua/vim/lsp/buf.lua:758>
     " we're not going to get anything useful to display from the rhs of these anyway
