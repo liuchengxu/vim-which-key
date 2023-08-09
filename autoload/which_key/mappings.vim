@@ -94,8 +94,8 @@ function! which_key#mappings#parse(key, dict, visual) " {{{
     let mapd.display = call(g:WhichKeyFormatFunc, [mapd.rhs])
 
     let mapd.lhs = substitute(mapd.lhs, key, '', '')
-    " FIXME: <Plug>(easymotion-prefix)
-    if mapd.lhs ==? '<Space>'
+    " EasyMotion workaround, <leader><leader> is default easymotion prefix
+    if mapd.lhs ==? '<Space>' && mapcheck('<leader><space>', 'n') =~ 'easymotion'
       continue
     endif
     let mapd.lhs = substitute(mapd.lhs, '<Space>', ' ', 'g')
