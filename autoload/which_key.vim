@@ -268,7 +268,6 @@ function! s:show_upper_level_mappings() abort
 endfunction
 
 function! s:getchar() abort
-  let input = ''
   try
     let c = getchar()
   " Handle <C-C>
@@ -290,15 +289,8 @@ function! s:getchar() abort
     return ''
   endif
 
-  " Handle special keys, `:h keycode`
-  " <CR>, <Enter>
-  if c == 13
-    return '<CR>'
-  elseif c == 9
-    return '<Tab>'
-  endif
+  let input = which_key#char_handler#parse_raw(c)
 
-  let input .= which_key#char_handler#parse_raw(c)
   if s:has_children(input)
     while 1
       if !which_key#char_handler#timeout_for_next_char()
@@ -308,6 +300,15 @@ function! s:getchar() abort
       endif
     endwhile
   endif
+
+  " Convert special keys to internal data structure that use String as the
+  " key, e.g., "\<Tab>" => "<Tab>"
+  if has_key(s:KEYCODES, input)
+    let input = s:KEYCODES[input]
+  elseif has_key(s:MERGE_INTO, input)
+    let input = s:MERGE_INTO[input]
+  endif
+
   return input
 endfunction
 
