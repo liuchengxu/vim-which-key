@@ -290,10 +290,12 @@ function! s:getchar() abort
     return ''
   endif
 
-  " :h keycode
+  " Handle special keys, `:h keycode`
   " <CR>, <Enter>
   if c == 13
     return '<CR>'
+  elseif c == 9
+    return '<Tab>'
   endif
 
   let input .= which_key#char_handler#parse_raw(c)
