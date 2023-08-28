@@ -141,6 +141,7 @@ function! s:cache_key(mode, key)
   let mode = a:mode
   let key = a:key
   if !has_key(s:cache[mode], key) || g:which_key_run_map_on_popup
+    let s:cache[mode][key] = {}
     call which_key#mappings#parse(key, s:cache[mode], mode)
   endif
 endfunction
