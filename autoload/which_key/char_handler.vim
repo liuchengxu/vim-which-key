@@ -74,8 +74,8 @@ function! s:initialize_exit_code() abort
     elseif ty == s:TYPE.string
       let s:exit_code = [g:which_key_exit]
     elseif ty == s:TYPE.list
-      let s:exit_code = map(g:which_key_exit, {e ->
-        \ type(e) == s:TYPE.number ? nr2char(e) : e})
+      let s:exit_code = map(g:which_key_exit, {_, val ->
+        \ type(val) == s:TYPE.number ? nr2char(val) : val})
     else
       echohl ErrorMsg
       echon '[which-key] '.g:which_key_exit.' is invalid for option g:which_key_exit'
