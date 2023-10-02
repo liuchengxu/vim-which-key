@@ -179,6 +179,7 @@ function! s:merge(target, native) " {{{
     while type(target[k]) == s:TYPE.funcref
       " Evaluate the funcref, to allow the result to be processed
       let target[k] = target[k]()
+      let V = target[k]
     endwhile
 
     if type(V) == s:TYPE.dict
