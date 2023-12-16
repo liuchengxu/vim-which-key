@@ -135,9 +135,10 @@ If no description dictionary is available, the right-hand-side of all mappings w
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/raw-spc-w.png"></p>
 
-The dictionary configuration is necessary to provide group names or a description text.
+The dictionary configuration is necessary to provide group names or a description text:
 
 ```vim
+let g:which_key_map = {}
 let g:which_key_map['w'] = {
       \ 'name' : '+windows' ,
       \ 'w' : ['<C-W>w'     , 'other-window']          ,
@@ -158,6 +159,7 @@ let g:which_key_map['w'] = {
       \ 'v' : ['<C-W>v'     , 'split-window-below']    ,
       \ '?' : ['Windows'    , 'fzf-window']            ,
       \ }
+call which_key#register('<Space>', "g:which_key_map")
 ```
 
 <p align="center"><img width="800px" src="https://raw.githubusercontent.com/liuchengxu/img/master/vim-which-key/spc-w.png"></p>
