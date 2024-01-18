@@ -18,7 +18,7 @@ keybindings in popup.
 
 {emacs-which-key}{1} started as a rewrite of {guide-key}{2}, very likely,
 {vim-which-key}{3} heavily rewrote {vim-leader-guide}{4} with a goal of going
-further in vim world. The features of vim-which-key has evolved a lot since
+further in vim world. The features of vim-which-key have evolved a lot since
 then.
 
 {1} https://github.com/justbur/emacs-which-key
@@ -47,10 +47,10 @@ open a subgroup.
 
 Please note that no matter which mappings and menus you configure, your
 original leader mappings will remain unaffected. The key guide is an
-additional layer. It will only activate, when you do not complete your input
+additional layer. It will only activate when you do not complete your input
 during the timeoutlen duration.
 
-Note that, a description dictionary is not necessary, all mappings will be
+Note that a description dictionary is not necessary, all mappings will be
 displayed regardless.
 >
   nnoremap <silent> <leader> :<c-u>WhichKey '<Space>'<CR>
@@ -195,7 +195,7 @@ window. Possible value: {0, 1}.
 Type: |String|
 Default: `botright`
 
-Set the direction from witch the guide-buffer should pop up. Possible value:
+Set the direction from which the guide-buffer should pop up. Possible value:
 'botright', 'topleft'.
 >
   let g:which_key_position = 'botright'
@@ -213,8 +213,8 @@ Possible value: `{0, 1}` .
 Type: |Number|
 Default: `0`
 
-If set to a value other than 1, the entries of each column will be align by
-the initial char instead of the seperator. Possible value: `{0, 1}` .
+If set to a value other than 1, the entries of each column will be aligned by
+the initial character instead of the separator. Possible value: `{0, 1}` .
 >
   let g:which_key_align_by_seperator = 1
 <
@@ -222,7 +222,7 @@ the initial char instead of the seperator. Possible value: `{0, 1}` .
 Type: |Number|
 Default: `0`
 
-Use neovim's floating or vim's popup window if avaliable. The adavantage is to
+Use neovim's floating or vim's popup window if available. The advantage is to
 put your current window layout untouched compared to splitting a new window.
 >
   let g:which_key_use_floating_win = 1
@@ -232,7 +232,7 @@ put your current window layout untouched compared to splitting a new window.
 Type: |Number|
 Default: `0`
 
-Make the vim popup or neovim floating_win relative to current window.
+Make the vim popup or neovim floating_win relative to the current window.
 
                                                    *g:which_key_floating_opts*
 Type: |Dict|
@@ -240,8 +240,8 @@ Default: `Undefined`
 
 You could use this variable to adjust the floating window layout. The
 key is either `row`, `col`, `width` or `height`. The value is a String of `+[number]`
-or `-[number]` which means plus or minus `numberl` based on the default value
-caculated by vim-which-key.
+or `-[number]` which means plus or minus `number` based on the default value
+calculated by vim-which-key.
 >
  let g:which_key_floating_opts = { 'row': '-1' }
 <
@@ -269,7 +269,7 @@ Type: |String|
 Default: `''`
 
 Allows to set a default group name. This name is shown as group description
-when the configuration dictionary has no corrosponding entry.
+when the configuration dictionary has no corresponding entry.
 >
   let g:which_key_default_group_name = ''
 <
@@ -308,7 +308,7 @@ Type: |Number|
 Default: `1`
 
 Ignore the invalid key and let you continue to input the valid ones. Otherwise
-an error message will be popuped and abort the guide buffer.
+an error message will appear in a popup and abort the guide buffer.
 Only applicable if |g:which_key_fallback_to_native_key| is 0, otherwise this
 setting is ignored.
                                          *g:which_key_ignore_outside_mappings*
@@ -317,7 +317,7 @@ Default: `0`
 
 Hides all mappings outside of the elements of the description dictionary.
                                                           *'which_key_ignore'*
-If you wish to hide a specific mapping from the menu set its description to
+If you wish to hide a specific mapping from the menu, set its description to
 `'which_key_ignore'`:
 >
     nnoremap <leader>1 :1wincmd w<CR>
@@ -337,7 +337,7 @@ For example, you can use `:WhichKey 'g'` and get `gg` work correct:
 Type: |Dict|
 Default: `{ ' ': 'SPC', '<C-H>': 'BS', '<C-I>': 'TAB', '<TAB>': 'TAB', }`
 
-Override the default symbols used for mappings. Dict keys should be all
+Override the default symbols used for mappings. Dictionary keys should be all
 uppercase.
 >
     let g:which_key_display_names = {'<CR>': '↵', '<TAB>': '⇆'}
@@ -390,7 +390,7 @@ COMMANDS                                              *vim-which-key-commands*
     nnoremap <leader> :<C-U>WhichKey '<Space>'<CR>
 <
 
-  Use |:WhichKey!| open the guide window for a given dictionary directly.
+  Use |:WhichKey!| to open the guide window for a given dictionary directly.
 
   Example:
 >
