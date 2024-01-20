@@ -37,8 +37,10 @@ let g:which_key#TYPE = s:TYPE
 let s:should_note_winid = exists('*win_getid')
 
 function! which_key#register(prefix, dict, ...) abort
-  let key = has_key(s:MERGE_INTO, a:prefix) ?
-    \ s:MERGE_INTO[a:prefix] : a:prefix
+  let key = has_key(s:KEYCODES, a:prefix) ?
+    \ s:KEYCODES[a:prefix] : a:prefix
+  let key = has_key(s:MERGE_INTO, key) ?
+    \ s:MERGE_INTO[key] : key
   let val = a:dict
   if a:0 == 1
     call extend(s:desc[a:1], {key:val})
@@ -53,11 +55,14 @@ function! s:handle_char_on_start_is_ok(c) abort
   if which_key#char_handler#is_exit_code(a:c)
     return 1
   endif
-  let char = type(a:c) == s:TYPE.number ? nr2char(a:c) : a:c
+  let char = which_key#char_handler#parse_raw(a:c)
   if has_key(s:KEYCODES, char)
     let char = s:KEYCODES[char]
   else
     let char = which_key#char_handler#parse_raw(char)
+  endif
+  if has_key(s:MERGE_INTO, char)
+    let char = s:MERGE_INTO[char]
   endif
   let s:which_key_trigger .= ' '.(char ==# ' ' ? '<Space>' : char)
   let next_level = get(s:runtime, char)
@@ -153,7 +158,7 @@ function! s:create_runtime(mode, key)
     if type(s:desc[mode][key]) == s:TYPE.dict
       let runtime = deepcopy(s:desc[mode][key])
     else
-      let runtime = deepcopy({s:desc[mode][key]})
+      let runtime = deepcopy(eval(s:desc[mode][key]))
     endif
     let native = s:cache[mode][key]
     call s:merge(runtime, native)
@@ -167,12 +172,12 @@ function! s:merge(target, native) " {{{
   let target = a:target
   let native = a:native
   " e.g. <C-І> is merged into <Tab>, '<Space>' is merged into ' '
-  call map(target, {k,v ->
-  \ has_key(s:MERGE_INTO, k) ?
-  \   (has_key(target, s:MERGE_INTO[k]) ?
-  \     extend(target[s:MERGE_INTO[k]], target[k], 'keep') :
-  \     extend(target, {s:MERGE_INTO[k]: target[k]})) :
-  \   v})
+  let mergekeys = filter(copy(target), {k,_ -> has_key(s:MERGE_INTO, k)})
+  call map(mergekeys, {k,v ->
+  \ (has_key(target, s:MERGE_INTO[k]) ?
+  \   extend(target[s:MERGE_INTO[k]], target[k], 'keep') :
+  \   extend(target, {s:MERGE_INTO[k]: target[k]}))
+  \ })
   call filter(target, {k,_ -> !has_key(s:MERGE_INTO, k)})
   for [k, V] in items(target)
     " Support a `Dictionary-function` for on-the-fly mappings
