@@ -245,6 +245,22 @@ calculated by vim-which-key.
 >
  let g:which_key_floating_opts = { 'row': '-1' }
 <
+                                          *g:which_key_floating_opts_explicit*
+Type: |Dict|
+Default: `Undefined`
+
+You can use this option to pass explicit {options} to |popup_create| or |nvim_open_win|. For example to change the borders:
+>
+ let g:which_key_floating_opts_explicit = { 'border': 'shadow' }
+<
+                                                   *g:which_key_floating_vars*
+Type: |Dict|
+Default: `Undefined`
+
+You can use this option to set variables on the floating window. For example to make the window transparent (Neovim only):
+>
+ let g:which_key_floating_vars = { '&winblend': '30' }
+<
                                                 *g:which_key_run_map_on_popup*
 Type: |Number|
 Default: `0`
