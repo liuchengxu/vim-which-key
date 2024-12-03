@@ -59,7 +59,8 @@ function! s:handle_char_on_start_is_ok(c) abort
   else
     let char = which_key#char_handler#parse_raw(char)
   endif
-  let s:which_key_trigger .= ' '.(char ==# ' ' ? '<Space>' : char)
+  let displaynames = which_key#renderer#get_displaynames()
+  let s:which_key_trigger .= ' '.get(displaynames, toupper(char), char)
   let next_level = get(s:runtime, char)
   let ty = type(next_level)
   if ty == s:TYPE.dict
@@ -106,7 +107,8 @@ function! which_key#start(vis, bang, prefix) " {{{
       let prefix = s:MERGE_INTO[prefix]
     endif
     let key = prefix
-    let s:which_key_trigger = key ==# ' ' ? '<Space>' : key
+    let displaynames = which_key#renderer#get_displaynames()
+    let s:which_key_trigger = get(displaynames, toupper(key), key)
     call s:cache_key(mode, key)
 
     " s:runtime is a dictionary combining the native key mapping dictionary
@@ -334,7 +336,8 @@ function! which_key#wait_for_input() " {{{
 endfunction
 
 function! s:show_next_level_mappings(next_runtime) abort
-  let s:which_key_trigger .= ' '.(s:cur_char ==# ' ' ? '<Space>' : s:cur_char)
+  let displaynames = which_key#renderer#get_displaynames()
+  let s:which_key_trigger .= ' '.get(displaynames, toupper(s:cur_char), s:cur_char)
   call add(s:last_runtime_stack, copy(s:runtime))
   let s:runtime = a:next_runtime
   call which_key#window#show(s:runtime)
