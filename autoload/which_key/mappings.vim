@@ -122,7 +122,9 @@ endfunction
 
 function! s:escape(mapping) abort " {{{
   let feedkeyargs = a:mapping.noremap ? 'nt' : 'mt'
-  let rhs = substitute(a:mapping.rhs, '\', '\\\\', 'g')
+  let rhs = substitute(a:mapping.rhs, '\c<Leader>', get(g:, 'mapleader', '\'), 'g')
+  let rhs = substitute(rhs, '\c<LocalLeader>', exists(g:, 'maplocalleader', '\'), 'g')
+  let rhs = substitute(rhs, '\', '\\\\', 'g')
   let rhs = substitute(rhs, '<\([^<>]*\)>', '\\<\1>', 'g')
   let rhs = substitute(rhs, '"', '\\"', 'g')
   let rhs = 'call feedkeys("'.rhs.'", "'.feedkeyargs.'")'
